@@ -4,7 +4,7 @@
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>com.jdreamer</groupId>
-    <artifactId>arabic-study</artifactId>
+    <artifactId>islamic-studies</artifactId>
     <version>1.0.0</version>
     <packaging>jar</packaging>
 
@@ -18,6 +18,11 @@
             <groupId>org.apache.pdfbox</groupId>
             <artifactId>pdfbox</artifactId>
             <version>3.0.1</version>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.pdfbox</groupId>
+            <artifactId>jbig2-imageio</artifactId>
+            <version>3.0.4</version>
         </dependency>
         <dependency>
             <groupId>org.xerial</groupId>

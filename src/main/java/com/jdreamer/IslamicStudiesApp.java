@@ -4,18 +4,24 @@ import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
 import java.awt.*;
 
+import java.awt.datatransfer.DataFlavor;
+import java.awt.dnd.DnDConstants;
+import java.awt.dnd.DropTarget;
+import java.awt.dnd.DropTargetAdapter;
+import java.awt.dnd.DropTargetDropEvent;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
 import java.sql.*;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.rendering.PDFRenderer;
 import org.apache.pdfbox.Loader;
 
-public class ArabicStudyApp extends JFrame {
+public class IslamicStudiesApp extends JFrame {
     private static final String DB_URL = "jdbc:sqlite:arabic-study.db";
 
     private JTextArea translationArea;
@@ -35,10 +41,11 @@ public class ArabicStudyApp extends JFrame {
     private Map<Integer, Integer> currentPages = new HashMap<>();
     private Map<Integer, Float> zoomFactors = new HashMap<>();
 
-    public ArabicStudyApp() {
+    public IslamicStudiesApp() {
         super("Arabic Study PDF + Database GUI");
         initDatabase();
         buildUI();
+        setupDragAndDrop();
         loadDataFromDB();
     }
 
@@ -316,38 +323,59 @@ public class ArabicStudyApp extends JFrame {
 
     private void loadPdfFile() {
         JFileChooser chooser = new JFileChooser();
+
         chooser.setDialogTitle("Select a PDF file");
         chooser.setFileFilter(new javax.swing.filechooser.FileNameExtensionFilter("PDF Documents", "pdf"));
+        chooser.setAcceptAllFileFilterUsed(false);
+
         int result = chooser.showOpenDialog(this);
         if (result == JFileChooser.APPROVE_OPTION) {
             File file = chooser.getSelectedFile();
-            try {
-                currentDocument = Loader.loadPDF(file);
-
-                // Get or create book record
-                String filePath = file.getAbsolutePath();
-                String fileName = file.getName();
-                currentBookId = getOrCreateBookId(filePath, fileName);
-
-                // Store the PDF document
-                loadedPdfs.put(currentBookId, currentDocument);
-
-                // Get or create tab for this book
-                createOrUpdateBookTab(currentBookId, fileName);
-
-                // Initialize book-specific data
-                int lastPage = getLastPageFromSession(currentBookId);
-                currentPage = Math.min(lastPage, currentDocument.getNumberOfPages() - 1);
-                currentPages.put(currentBookId, currentPage);
-                zoomFactors.put(currentBookId, 1.0f);
-
-                // Switch to the book
-                switchToBook(currentBookId);
-            } catch (IOException e) {
-                e.printStackTrace();
-                JOptionPane.showMessageDialog(this, "Failed to open PDF: " + e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
-            }
+            openPDF(file);
         }
+    }
+
+    private void openPDF(File file) {
+        try {
+            currentDocument = Loader.loadPDF(file);
+
+            // Get or create book record
+            String filePath = file.getAbsolutePath();
+            String fileName = file.getName();
+            currentBookId = getOrCreateBookId(filePath, fileName);
+
+            // Store the PDF document
+            loadedPdfs.put(currentBookId, currentDocument);
+
+            // Get or create tab for this book
+            createOrUpdateBookTab(currentBookId, fileName);
+
+            // Initialize book-specific data
+            int lastPage = getLastPageFromSession(currentBookId);
+            currentPage = Math.min(lastPage, currentDocument.getNumberOfPages() - 1);
+            currentPages.put(currentBookId, currentPage);
+            zoomFactors.put(currentBookId, 1.0f);
+
+            // Switch to the book
+            switchToBook(currentBookId);
+        } catch (IOException e) {
+            e.printStackTrace();
+            JOptionPane.showMessageDialog(this, "Failed to open PDF: " + e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+        }
+    }
+
+    private void setupDragAndDrop() {
+        new DropTarget(this, new DropTargetAdapter() {
+            public void drop(DropTargetDropEvent dtde) {
+                try {
+                    dtde.acceptDrop(DnDConstants.ACTION_COPY);
+                    java.util.List<File> files = (List<File>) dtde.getTransferable().getTransferData(DataFlavor.javaFileListFlavor);
+                    for (File f : files) {
+                        if (f.getName().endsWith(".pdf")) openPDF(f);
+                    }
+                } catch (Exception e) { e.printStackTrace(); }
+            }
+        });
     }
 
     private void createOrUpdateBookTab(int bookId, String fileName) {
@@ -589,6 +617,6 @@ public class ArabicStudyApp extends JFrame {
     }
 
     public static void main(String[] args) {
-        SwingUtilities.invokeLater(() -> new ArabicStudyApp());
+        SwingUtilities.invokeLater(() -> new IslamicStudiesApp());
     }
 }
