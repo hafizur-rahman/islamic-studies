@@ -22,7 +22,7 @@ import org.apache.pdfbox.rendering.PDFRenderer;
 import org.apache.pdfbox.Loader;
 
 public class IslamicStudiesApp extends JFrame {
-    private static final String DB_URL = "jdbc:sqlite:arabic-study.db";
+    private static final String DB_URL = "jdbc:derby:islamic-studies;create=true";
 
     private JTextArea translationArea;
     private JTable verbsTable;
