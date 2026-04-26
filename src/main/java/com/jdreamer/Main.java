@@ -1,5 +1,6 @@
 package com.jdreamer;
 
+import com.jdreamer.service.BookService;
 import com.jdreamer.ui.MainWindow;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
@@ -25,14 +26,14 @@ public class Main {
      * After the Spring context has started, launch the Swing UI.
      */
     @Bean
-    CommandLineRunner startUi() {
+    CommandLineRunner startUi(BookService bookService) {
         return args -> {
-            SwingUtilities.invokeLater(Main::createAndShowGui);
+            SwingUtilities.invokeLater(() -> createAndShowGui(bookService));
         };
     }
 
-    private static void createAndShowGui() {
-        JFrame frame = new MainWindow();
+    private static void createAndShowGui(BookService bookService) {
+        JFrame frame = new MainWindow(bookService);
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
         frame.setLocationRelativeTo(null); // center on screen

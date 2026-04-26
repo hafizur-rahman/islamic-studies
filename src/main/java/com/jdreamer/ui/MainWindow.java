@@ -1,11 +1,17 @@
 package com.jdreamer.ui;
 
+import com.jdreamer.service.BookService;
+
 import javax.swing.*;
 import java.awt.*;
 
 public class MainWindow extends JFrame {
-    public MainWindow() {
+    private BookService bookService;
+
+    public MainWindow(BookService bookService) {
         super("Islamic Studies");
+
+        this.bookService = bookService;
 
         buildUI();
     }
@@ -13,7 +19,7 @@ public class MainWindow extends JFrame {
     private void buildUI() {
         setLayout(new BorderLayout());
 
-        BookPanel bookPanel = new BookPanel();
+        BookPanel bookPanel = new BookPanel(bookService);
         NotesPanel notesPanel = new NotesPanel();
 
         JSplitPane splitPane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, bookPanel, notesPanel);

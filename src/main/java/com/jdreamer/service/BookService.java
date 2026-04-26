@@ -7,5 +7,5 @@ import java.util.ArrayList;
 public interface BookService {
     ArrayList<Book> findAllBooks();
 
-    Book findBook(int id);
+    Book findBookById(int id);
 }

@@ -1,5 +1,7 @@
 package com.jdreamer.ui;
 
+import com.jdreamer.model.Book;
+import com.jdreamer.service.BookService;
 import org.apache.pdfbox.Loader;
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.rendering.PDFRenderer;
@@ -14,6 +16,7 @@ import java.awt.dnd.DropTargetDropEvent;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
+import java.sql.*;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -28,8 +31,13 @@ public class BookPanel extends JPanel {
     private Map<Integer, JLabel> pdfLabels = new HashMap<>();
     private Map<Integer, Integer> currentPages = new HashMap<>();
     private Map<Integer, Float> zoomFactors = new HashMap<>();
-    public BookPanel() {
+
+    private BookService bookService;
+
+    public BookPanel(BookService bookService) {
         super(new BorderLayout());
+
+        this.bookService = bookService;
 
         buildUI();
 
@@ -82,10 +90,10 @@ public class BookPanel extends JPanel {
 
         prevPageBtn.addActionListener(e -> showPageForBook(currentBookId, currentPages.getOrDefault(currentBookId, 0) - 1));
         nextPageBtn.addActionListener(e -> showPageForBook(currentBookId, currentPages.getOrDefault(currentBookId, 0) + 1));
-//        zoomInBtn.addActionListener(e -> zoomInForBook(currentBookId));
-//        zoomOutBtn.addActionListener(e -> zoomOutForBook(currentBookId));
-//        resetZoomBtn.addActionListener(e -> resetZoomForBook(currentBookId));
-//        closeBtn.addActionListener(e -> closeBook(currentBookId));
+        zoomInBtn.addActionListener(e -> zoomInForBook(currentBookId));
+        zoomOutBtn.addActionListener(e -> zoomOutForBook(currentBookId));
+        resetZoomBtn.addActionListener(e -> resetZoomForBook(currentBookId));
+        closeBtn.addActionListener(e -> closeBook(currentBookId));
 
         toolbar.add(prevPageBtn);
         toolbar.add(nextPageBtn);
@@ -124,7 +132,7 @@ public class BookPanel extends JPanel {
             loadedPdfs.put(currentBookId, currentDocument);
 
             // Get or create tab for this book
-            //createOrUpdateBookTab(currentBookId, fileName);
+            createOrUpdateBookTab(currentBookId, fileName);
 
             // Initialize book-specific data
             int lastPage = 1; //getLastPageFromSession(currentBookId);
@@ -195,7 +203,7 @@ public class BookPanel extends JPanel {
             currentPages.put(bookId, pageIndex);
             // Save current page to session
 //            saveSessionPage(bookId, pageIndex);
-//            loadDataByPage(pageIndex);
+            loadDataByPage(pageIndex);
         } catch (IOException e) {
             e.printStackTrace();
             JOptionPane.showMessageDialog(this, "Failed to render PDF page: " + e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
@@ -231,4 +239,98 @@ public class BookPanel extends JPanel {
         }
     }
 
+    private void createOrUpdateBookTab(int bookId, String fileName) {
+        Book bookById = bookService.findBookById(bookId);
+
+        if (bookById != null) {
+
+            String title = bookById.getTitle();
+            String tabTitle = title + " (ID: " + bookId + ")";
+
+            // Create panel for this book if not exists
+            if (!pdfLabels.containsKey(bookId)) {
+                JLabel pdfLabel = new JLabel("Loading...", SwingConstants.CENTER);
+                pdfLabel.setVerticalAlignment(SwingConstants.CENTER);
+                pdfLabel.setHorizontalAlignment(SwingConstants.CENTER);
+                pdfLabels.put(bookId, pdfLabel);
+
+                JScrollPane pdfScroll = new JScrollPane(pdfLabel);
+
+                JPanel bookPanel = new JPanel(new BorderLayout());
+
+                bookPanel.add(pdfScroll, BorderLayout.CENTER);
+
+                booksTabbedPane.addTab(tabTitle, bookPanel);
+            }
+        }
+
+    }
+
+    private void zoomInForBook(int bookId) {
+        float zoom = zoomFactors.getOrDefault(bookId, 1.0f);
+        zoom *= 1.2f;
+        if (zoom > 5.0f) zoom = 5.0f;
+        zoomFactors.put(bookId, zoom);
+        showPageForBook(bookId, currentPages.getOrDefault(bookId, 0));
+    }
+
+    private void zoomOutForBook(int bookId) {
+        float zoom = zoomFactors.getOrDefault(bookId, 1.0f);
+        zoom /= 1.2f;
+        if (zoom < 0.1f) zoom = 0.1f;
+        zoomFactors.put(bookId, zoom);
+        showPageForBook(bookId, currentPages.getOrDefault(bookId, 0));
+    }
+
+    private void resetZoomForBook(int bookId) {
+        zoomFactors.put(bookId, 1.0f);
+        showPageForBook(bookId, currentPages.getOrDefault(bookId, 0));
+    }
+
+    private void closeBook(int bookId) {
+        if (loadedPdfs.containsKey(bookId)) {
+            PDDocument doc = loadedPdfs.get(bookId);
+            try {
+                doc.close();
+            } catch (IOException ignore) {
+            }
+
+            loadedPdfs.remove(bookId);
+            pdfLabels.remove(bookId);
+            currentPages.remove(bookId);
+            zoomFactors.remove(bookId);
+
+            // Find and remove the tab
+            for (int i = 0; i < booksTabbedPane.getTabCount(); i++) {
+                String tabTitle = booksTabbedPane.getTitleAt(i);
+                int idStartPos = tabTitle.lastIndexOf("ID: ");
+                if (idStartPos != -1) {
+                    String idStr = tabTitle.substring(idStartPos + 4, tabTitle.length() - 1);
+                    try {
+                        int tabBookId = Integer.parseInt(idStr);
+                        if (tabBookId == bookId) {
+                            booksTabbedPane.removeTabAt(i);
+                            break;
+                        }
+                    } catch (NumberFormatException ex) {
+                        ex.printStackTrace();
+                    }
+                }
+            }
+
+            // If this was the current book, switch to another one
+            if (bookId == currentBookId) {
+                if (booksTabbedPane.getTabCount() > 0) {
+                    booksTabbedPane.setSelectedIndex(0);
+                } else {
+                    currentBookId = -1;
+                    currentDocument = null;
+                }
+            }
+        }
+    }
+
+    private void loadDataByPage(int page) {
+
+    }
 }
