@@ -1,6 +1,7 @@
 package com.jdreamer.ui;
 
 import com.jdreamer.model.Book;
+import com.jdreamer.model.UserSession;
 import com.jdreamer.service.BookService;
 import org.apache.pdfbox.Loader;
 import org.apache.pdfbox.pdmodel.PDDocument;
@@ -126,7 +127,8 @@ public class BookPanel extends JPanel {
             // Get or create book record
             String filePath = file.getAbsolutePath();
             String fileName = file.getName();
-            //currentBookId = getOrCreateBookId(filePath, fileName);
+
+            currentBookId = getOrCreateBookId(filePath, fileName);
 
             // Store the PDF document
             loadedPdfs.put(currentBookId, currentDocument);
@@ -135,7 +137,8 @@ public class BookPanel extends JPanel {
             createOrUpdateBookTab(currentBookId, fileName);
 
             // Initialize book-specific data
-            int lastPage = 1; //getLastPageFromSession(currentBookId);
+            UserSession session = bookService.findUserSessionByBookId(currentBookId);
+            int lastPage = (session != null) ? session.getPageId() : 0;
             currentPage = Math.min(lastPage, currentDocument.getNumberOfPages() - 1);
             currentPages.put(currentBookId, currentPage);
             zoomFactors.put(currentBookId, 1.0f);
@@ -163,6 +166,21 @@ public class BookPanel extends JPanel {
                 }
             }
         });
+    }
+
+    private int getOrCreateBookId(String filePath, String title) {
+        Book book = bookService.findBookByFilePath(filePath);
+
+        if (book == null) {
+            book = new Book();
+            book.setFilePath(filePath);
+            book.setTitle(title);
+            book.setLastAccessed(System.currentTimeMillis());
+
+            bookService.save(book);
+        }
+
+        return book.getId();
     }
 
     private void showPageForBook(int bookId, int pageIndex) {
@@ -202,7 +220,7 @@ public class BookPanel extends JPanel {
 
             currentPages.put(bookId, pageIndex);
             // Save current page to session
-//            saveSessionPage(bookId, pageIndex);
+            saveSessionPage(bookId, pageIndex);
             loadDataByPage(pageIndex);
         } catch (IOException e) {
             e.printStackTrace();
@@ -242,10 +260,10 @@ public class BookPanel extends JPanel {
     private void createOrUpdateBookTab(int bookId, String fileName) {
         Book bookById = bookService.findBookById(bookId);
 
-//        if (bookById != null) {
-//
-//            String title = bookById.getTitle();
-//            String tabTitle = title + " (ID: " + bookId + ")";
+        if (bookById != null) {
+
+            String title = bookById.getTitle();
+            String tabTitle = title + " (ID: " + bookId + ")";
 
             // Create panel for this book if not exists
             if (!pdfLabels.containsKey(bookId)) {
@@ -260,9 +278,9 @@ public class BookPanel extends JPanel {
 
                 bookPanel.add(pdfScroll, BorderLayout.CENTER);
 
-                booksTabbedPane.addTab(""+bookId, bookPanel);
+                booksTabbedPane.addTab(tabTitle, bookPanel);
             }
-       // }
+       }
 
     }
 
@@ -332,5 +350,19 @@ public class BookPanel extends JPanel {
 
     private void loadDataByPage(int page) {
 
+    }
+
+    private void saveSessionPage(int bookId, int page) {
+        UserSession session = bookService.findUserSessionByBookId(bookId);
+
+        if (session == null) {
+            session = new UserSession();
+            session.setBookId(bookId);
+        }
+
+        session.setPageId(page);
+        session.setAccessedAt(System.currentTimeMillis());
+
+        bookService.saveSession(session);
     }
 }

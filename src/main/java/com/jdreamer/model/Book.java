@@ -8,7 +8,7 @@ import jakarta.persistence.*;
 @Table
 @Data
 @EqualsAndHashCode(of = "id")
-@NoArgsConstructor(force = true, access = AccessLevel.PRIVATE)
+@NoArgsConstructor(force = true, access = AccessLevel.PUBLIC)
 public class Book {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
