@@ -1,5 +1,6 @@
 package com.jdreamer;
 
+import com.jdreamer.ui.MainWindow;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 import org.springframework.boot.CommandLineRunner;
