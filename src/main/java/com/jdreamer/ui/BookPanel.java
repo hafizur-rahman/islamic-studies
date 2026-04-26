@@ -242,10 +242,10 @@ public class BookPanel extends JPanel {
     private void createOrUpdateBookTab(int bookId, String fileName) {
         Book bookById = bookService.findBookById(bookId);
 
-        if (bookById != null) {
-
-            String title = bookById.getTitle();
-            String tabTitle = title + " (ID: " + bookId + ")";
+//        if (bookById != null) {
+//
+//            String title = bookById.getTitle();
+//            String tabTitle = title + " (ID: " + bookId + ")";
 
             // Create panel for this book if not exists
             if (!pdfLabels.containsKey(bookId)) {
@@ -260,9 +260,9 @@ public class BookPanel extends JPanel {
 
                 bookPanel.add(pdfScroll, BorderLayout.CENTER);
 
-                booksTabbedPane.addTab(tabTitle, bookPanel);
+                booksTabbedPane.addTab(""+bookId, bookPanel);
             }
-        }
+       // }
 
     }
 
