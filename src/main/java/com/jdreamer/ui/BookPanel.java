@@ -50,13 +50,14 @@ public class BookPanel extends JPanel {
 
         add(new JScrollPane(tree), BorderLayout.WEST);
 
-        JPanel toolbar = getToolbar();
-
-        add(toolbar, BorderLayout.NORTH);
+        JPanel pdfView = new JPanel(new BorderLayout());
+        pdfView.add(getToolbar(), BorderLayout.NORTH);
 
         createTabbedPane();
 
-        add(booksTabbedPane, BorderLayout.CENTER);
+        pdfView.add(booksTabbedPane, BorderLayout.CENTER);
+
+        add(pdfView, BorderLayout.CENTER);
     }
 
     private FileSystemTree creteFileSystemTree() {
