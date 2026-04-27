@@ -3,9 +3,11 @@ package com.jdreamer.service;
 import com.jdreamer.model.Book;
 import com.jdreamer.model.Noun;
 import com.jdreamer.model.UserSession;
+import com.jdreamer.model.Verb;
 import com.jdreamer.repository.BookRepository;
 import com.jdreamer.repository.NounRepository;
 import com.jdreamer.repository.UserSessionRepository;
+import com.jdreamer.repository.VerbRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -21,6 +23,9 @@ public class BookServiceImpl implements BookService {
 
     @Autowired
     NounRepository nounRepository;
+
+    @Autowired
+    VerbRepository verbRepository;
 
     @Autowired
     UserSessionRepository userSessionRepository;
@@ -72,7 +77,17 @@ public class BookServiceImpl implements BookService {
     }
 
     @Override
-    public void saveAll(List<Noun> nouns) {
+    public void saveNouns(List<Noun> nouns) {
         nounRepository.saveAll(nouns);
+    }
+
+    @Override
+    public void saveVerbs(List<Verb> verbs) {
+        verbRepository.saveAll(verbs);
+    }
+
+    @Override
+    public List<Verb> findVerbsByBookIdAndPageId(int bookId, int pageId) {
+        return verbRepository.findNounsByBookIdAndPageId(bookId, pageId);
     }
 }

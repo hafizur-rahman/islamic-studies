@@ -4,22 +4,19 @@ import com.jdreamer.model.Noun;
 import com.jdreamer.service.BookService;
 
 import javax.swing.table.AbstractTableModel;
-import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
 public class NounTableModel extends AbstractTableModel {
-    private BookService bookService;
 
     private final String[] columns = {"ID", "Meaning", "Plural", "Dual", "Singular", "BookID", "PageID"};
     // Use a private final list to ensure we control the data source
     private final List<Noun> nouns;
 
-    public NounTableModel(List<Noun> nouns, BookService bookService) {
+    public NounTableModel(List<Noun> nouns) {
         // We wrap the input list in a new ArrayList to ensure it is MUTABLE.
         // This prevents UnsupportedOperationException if List.of() or Arrays.asList() was passed.
         this.nouns = (nouns != null) ? new ArrayList<>(nouns) : new ArrayList<>();
-        this.bookService = bookService;
     }
 
     @Override
@@ -115,7 +112,7 @@ public class NounTableModel extends AbstractTableModel {
      * Creates a blank Noun object to act as a template for the user.
      */
     public void addEmptyRowAtEnd(int bookId, int pageId) {
-        if (nouns.isEmpty() || nouns.getLast().getSingular() != null) {
+        if (nouns.isEmpty() || nouns.get(nouns.size()-1).getSingular() != null) {
             int newIndex = nouns.size();
 
             Noun newNoun = new Noun(); // Assumes a default constructor exists

@@ -3,6 +3,7 @@ package com.jdreamer.service;
 import com.jdreamer.model.Book;
 import com.jdreamer.model.Noun;
 import com.jdreamer.model.UserSession;
+import com.jdreamer.model.Verb;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -24,5 +25,9 @@ public interface BookService {
 
     List<Noun> findNounsByBookIdAndPageId(int bookId, int pageId);
 
-    void saveAll(List<Noun> nouns);
+    void saveNouns(List<Noun> nouns);
+
+    void saveVerbs(List<Verb> verbs);
+
+    List<Verb> findVerbsByBookIdAndPageId(int bookId, int pageId);
 }

@@ -1,5 +1,6 @@
 package com.jdreamer.ui.model;
 
+import com.jdreamer.model.Noun;
 import com.jdreamer.model.Verb;
 
 import javax.swing.table.AbstractTableModel;
@@ -63,19 +64,39 @@ public class VerbTableModel extends AbstractTableModel {
     public void setValueAt(Object value, int row, int col) {
         Verb v = verbs.get(row);
 
-        switch (col) {
-            case 0 -> v.setId((Integer) value);
-            case 1 -> v.setBab((String) value);
-            case 2 -> v.setMeaning((String) value);
-            case 3 -> v.setMasdar((String) value);
-            case 4 -> v.setCommand((String) value);
-            case 5 -> v.setFuture((String) value);
-            case 6 -> v.setPast((String) value);
-            case 7 -> v.setWord((String) value);
-            case 8 -> v.setBookId((Integer) value);
-            case 9 -> v.setPageId((Integer) value);
+        try {
+            switch (col) {
+                case 0 -> v.setId(tryParseInt(value));
+                case 1 -> v.setBab(value != null ? value.toString() : "");
+                case 2 -> v.setMeaning(value != null ? value.toString() : "");
+                case 3 -> v.setMasdar(value != null ? value.toString() : "");
+                case 4 -> v.setCommand(value != null ? value.toString() : "");
+                case 5 -> v.setFuture(value != null ? value.toString() : "");
+                case 6 -> v.setPast(value != null ? value.toString() : "");
+                case 7 -> v.setWord(value != null ? value.toString() : "");
+                case 8 -> v.setBookId(tryParseInt(value));
+                case 9 -> v.setPageId(tryParseInt(value));
+            }
+            fireTableCellUpdated(row, col);
+        } catch (Exception e) {
+            System.err.println("Error updating cell: " + e.getMessage());
         }
-        fireTableCellUpdated(row, col);
+    }
+
+    /**
+     * Helper to prevent ClassCastException when the UI passes a String
+     * (from a TextField) into an Integer field.
+     */
+    private Integer tryParseInt(Object value) {
+        if (value instanceof Integer i) return i;
+        if (value instanceof String s) {
+            try {
+                return Integer.parseInt(s);
+            } catch (NumberFormatException e) {
+                return 0; // Default value on error
+            }
+        }
+        return 0;
     }
 
     /* --------------------- Utility --------------------- */
@@ -85,10 +106,29 @@ public class VerbTableModel extends AbstractTableModel {
         fireTableDataChanged();
     }
 
-    public void addWord(Verb v) {
-        int idx = verbs.size();
-        verbs.add(v);
+    /**
+     * Adds a new row at the end of the existing non-empty rows.
+     * Creates a blank Noun object to act as a template for the user.
+     */
+    public void addEmptyRowAtEnd(int bookId, int pageId) {
+        if (verbs.isEmpty() || verbs.get(verbs.size()-1).getWord() != null) {
+            int newIndex = verbs.size();
 
-        fireTableRowsInserted(idx, idx);
+            Verb newVerb = new Verb(); // Assumes a default constructor exists
+
+            newVerb.setBookId(bookId);
+            newVerb.setPageId(pageId);
+
+            verbs.add(newVerb);
+
+            fireTableRowsInserted(newIndex, newIndex);
+
+            // Optional: You could add logic here to automatically
+            // select the new row in the JTable via the UI controller.
+        }
+    }
+
+    public List<Verb> getVerbs() {
+        return verbs;
     }
 }
