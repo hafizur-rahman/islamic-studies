@@ -23,7 +23,7 @@ public class JcefPdfViewerApp {
 
         builder.setInstallDir(new File("jcef-bundle")); //Default
         builder.setProgressHandler(new ConsoleProgressHandler()); //Default
-        builder.addJcefArgs("--disable-gpu");
+        builder.addJcefArgs("--disable-gpu --enable-features=PdfUnseasoned");
         builder.getCefSettings().windowless_rendering_enabled = false; //Don't select OSR mode
 
         //Set an app handler. Do not use CefApp.addAppHandler(...), it will break your code on MacOSX!
@@ -46,7 +46,9 @@ public class JcefPdfViewerApp {
         });
 
         // Create a browser instance and load a URL
-        String url = "file:///C:\\Users\\bibag\\work\\islamic-studies\\Library\\7. School Book\\Palestine\\G01\\arabic G1_P1.pdf";
+        String filePath = "C:\\Users\\bibag\\work\\islamic-studies\\Library\\7. School Book\\Palestine\\G01\\arabic G1_P1.pdf";
+        String url = "file:///" + filePath.replace('\\', '/');
+
         CefBrowser browser = client.createBrowser(url, false, false); // (URL, isPopup, isWindowless)
 
         // Step 3: Embed the browser in a Swing window
@@ -68,8 +70,6 @@ public class JcefPdfViewerApp {
             cefApp.dispose(); // Clean up CEF resources
             System.out.println("CEF shutdown complete.");
         }));
-
-        //JcefPdfViewer viewer = new JcefPdfViewer(app, );
 
     }
 }
