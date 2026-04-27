@@ -23,12 +23,12 @@ public class MainWindow extends JFrame {
         NotesPanel notesPanel = new NotesPanel();
 
         JSplitPane splitPane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, bookPanel, notesPanel);
-        splitPane.setDividerLocation(700);
+        splitPane.setDividerLocation(900);
 
         add(splitPane, BorderLayout.CENTER);
 
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        setSize(1200, 850);
+        setSize(1600, 850);
         setLocationRelativeTo(null);
         setVisible(true);
     }

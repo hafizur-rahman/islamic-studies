@@ -201,20 +201,11 @@ public class BookPanel extends JPanel {
         }
 
         try {
-            PDFRenderer renderer = new PDFRenderer(doc);
-            BufferedImage img = renderer.renderImageWithDPI(pageIndex, 120);
-
             float bookZoom = zoomFactors.getOrDefault(bookId, 1.0f);
-            if (bookZoom != 1.0f) {
-                int newWidth = (int) (img.getWidth() * bookZoom);
-                int newHeight = (int) (img.getHeight() * bookZoom);
-                BufferedImage scaledImg = new BufferedImage(newWidth, newHeight, img.getType());
-                Graphics2D g2d = scaledImg.createGraphics();
-                g2d.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BILINEAR);
-                g2d.drawImage(img, 0, 0, newWidth, newHeight, null);
-                g2d.dispose();
-                img = scaledImg;
-            }
+
+            PDFRenderer renderer = new PDFRenderer(doc);
+            BufferedImage img = renderer.renderImageWithDPI(pageIndex, 95 * bookZoom);
+
             label.setIcon(new ImageIcon(img));
             label.setText(null);
 
@@ -233,9 +224,11 @@ public class BookPanel extends JPanel {
             return;
         }
 
+        UserSession session = bookService.findUserSessionByBookId(bookId);
+
         currentBookId = bookId;
         currentDocument = loadedPdfs.get(bookId);
-        currentPage = currentPages.getOrDefault(bookId, 0);
+        currentPage = session != null ? session.getPageId() : currentPages.getOrDefault(bookId, 0);
 
         // Update tab selection
         for (int i = 0; i < booksTabbedPane.getTabCount(); i++) {
