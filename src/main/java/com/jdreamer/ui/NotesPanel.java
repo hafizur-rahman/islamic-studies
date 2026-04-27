@@ -1,13 +1,16 @@
 package com.jdreamer.ui;
 
+import com.jdreamer.model.Noun;
 import com.jdreamer.service.BookService;
 
 import javax.swing.*;
 import java.awt.*;
+import java.util.List;
 
 public class NotesPanel extends JPanel {
     private final BookService bookService;
     private JTextArea translationArea;
+    private NounPanel nounPanel;
 
     public NotesPanel(BookService bookService) {
         super(new BorderLayout());
@@ -24,8 +27,11 @@ public class NotesPanel extends JPanel {
         translationScroll.setBorder(BorderFactory.createTitledBorder("Translation (Editable)"));
 
         JPanel tablesPanel = new JPanel(new GridLayout(2, 1, 8, 8));
+
+        nounPanel = new NounPanel();
+
         tablesPanel.add(new VerbPanel());
-        tablesPanel.add(new NounPanel(bookService));
+        tablesPanel.add(nounPanel);
         tablesPanel.setBorder(BorderFactory.createTitledBorder("Language Data (Optional Editable)"));
 
         JButton saveDataBtn = new JButton("Save Data to DB");
@@ -37,5 +43,10 @@ public class NotesPanel extends JPanel {
         topLeft.add(saveDataBtn, BorderLayout.SOUTH);
 
         add(topLeft, BorderLayout.CENTER);
+    }
+
+    public void onBookOrPageChange(int bookId, int pageId) {
+        List<Noun> nouns = this.bookService.findNounsByBookIdAndPageId(bookId, pageId);
+        nounPanel.loadData(nouns);
     }
 }
