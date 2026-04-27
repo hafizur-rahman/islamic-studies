@@ -32,7 +32,6 @@ public class NotesPanel extends JPanel {
 
         tablesPanel.add(new VerbPanel());
         tablesPanel.add(nounPanel);
-        tablesPanel.setBorder(BorderFactory.createTitledBorder("Language Data (Optional Editable)"));
 
         JButton saveDataBtn = new JButton("Save Data to DB");
         //saveDataBtn.addActionListener(e -> saveDataToDB());

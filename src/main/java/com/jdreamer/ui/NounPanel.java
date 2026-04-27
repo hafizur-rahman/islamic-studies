@@ -27,10 +27,14 @@ public class NounPanel extends JPanel {
 
         add(new JScrollPane(nounsTable), BorderLayout.CENTER);
 
+        JPanel buttonPanel = new JPanel();
         JButton addNounBtn = new JButton("Add Noun");
         //addNounBtn.addActionListener(e -> nounsModel.addRow(new Object[]{"", "", "", "", 0, 0}));
+        buttonPanel.add(addNounBtn);
 
-        add(addNounBtn, BorderLayout.SOUTH);
+        add(buttonPanel, BorderLayout.SOUTH);
+
+        setBorder(BorderFactory.createTitledBorder("Nouns"));
     }
 
     public void loadData(List<Noun> nouns) {
