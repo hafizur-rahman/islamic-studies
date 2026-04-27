@@ -8,6 +8,7 @@ import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.rendering.PDFRenderer;
 
 import javax.swing.*;
+import javax.swing.tree.TreePath;
 import java.awt.*;
 import java.awt.datatransfer.DataFlavor;
 import java.awt.dnd.DnDConstants;
@@ -17,15 +18,14 @@ import java.awt.dnd.DropTargetDropEvent;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
-import java.sql.*;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 public class BookPanel extends JPanel {
     private int currentBookId = -1;
+
     private JTabbedPane booksTabbedPane;
-    private JLabel pdfImageLabel;
     private int currentPage = 0;
     private PDDocument currentDocument;
     private Map<Integer, PDDocument> loadedPdfs = new HashMap<>();
@@ -46,6 +46,10 @@ public class BookPanel extends JPanel {
     }
 
     private void buildUI() {
+        FileSystemTree tree = creteFileSystemTree();
+
+        add(new JScrollPane(tree), BorderLayout.WEST);
+
         JPanel toolbar = getToolbar();
 
         add(toolbar, BorderLayout.NORTH);
@@ -53,6 +57,36 @@ public class BookPanel extends JPanel {
         createTabbedPane();
 
         add(booksTabbedPane, BorderLayout.CENTER);
+    }
+
+    private FileSystemTree creteFileSystemTree() {
+        // Choose a root folder – here the user’s home directory
+        File rootDir = new File("C:\\Users\\bibag\\work\\islamic-studies\\Library");
+        FileSystemTree tree = new FileSystemTree(rootDir);
+
+        // Optional: double‑click opens the file
+        tree.addMouseListener(new java.awt.event.MouseAdapter() {
+            @Override
+            public void mouseClicked(java.awt.event.MouseEvent e) {
+
+                if (e.getClickCount() == 2 && isFileSelected(tree)) {
+                    File f = ((FileTreeNode) tree.getSelectionPath().getLastPathComponent()).getFile();
+
+                    if (f != null) {
+                        try {
+                           openPDF(f);
+                        } catch (Exception ex) {
+                            JOptionPane.showMessageDialog(BookPanel.this,
+                                    "Could not open file:\n" + ex.getMessage(),
+                                    "Error",
+                                    JOptionPane.ERROR_MESSAGE);
+                        }
+                    }
+                }
+            }
+        });
+
+        return tree;
     }
 
     private void createTabbedPane() {
@@ -78,9 +112,6 @@ public class BookPanel extends JPanel {
 
     private JPanel getToolbar() {
         JPanel toolbar = new JPanel(new FlowLayout(FlowLayout.LEFT));
-        JButton loadPdfBtn = new JButton("Load PDF");
-        loadPdfBtn.addActionListener(e -> loadPdfFile());
-        toolbar.add(loadPdfBtn);
 
         JButton prevPageBtn = new JButton("Previous");
         JButton nextPageBtn = new JButton("Next");
@@ -104,20 +135,6 @@ public class BookPanel extends JPanel {
         toolbar.add(closeBtn);
 
         return toolbar;
-    }
-
-    private void loadPdfFile() {
-        JFileChooser chooser = new JFileChooser();
-
-        chooser.setDialogTitle("Select a PDF file");
-        chooser.setFileFilter(new javax.swing.filechooser.FileNameExtensionFilter("PDF Documents", "pdf"));
-        chooser.setAcceptAllFileFilterUsed(false);
-
-        int result = chooser.showOpenDialog(this);
-        if (result == JFileChooser.APPROVE_OPTION) {
-            File file = chooser.getSelectedFile();
-            openPDF(file);
-        }
     }
 
     private void openPDF(File file) {
@@ -166,6 +183,16 @@ public class BookPanel extends JPanel {
                 }
             }
         });
+    }
+
+    private boolean isFileSelected(JTree tree) {
+        TreePath path = tree.getSelectionPath();
+        if (path == null) return false;
+
+        Object node = path.getLastPathComponent();
+        if (!(node instanceof FileTreeNode)) return false;
+
+        return ((FileTreeNode) node).getFile().isFile();
     }
 
     private int getOrCreateBookId(String filePath, String title) {
