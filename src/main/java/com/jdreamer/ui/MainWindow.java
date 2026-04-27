@@ -19,8 +19,8 @@ public class MainWindow extends JFrame {
     private void buildUI() {
         setLayout(new BorderLayout());
 
-        BookPanel bookPanel = new BookPanel(bookService);
         NotesPanel notesPanel = new NotesPanel(bookService);
+        BookPanel bookPanel = new BookPanel(bookService, notesPanel);
 
         JSplitPane splitPane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, bookPanel, notesPanel);
         splitPane.setDividerLocation(1200);

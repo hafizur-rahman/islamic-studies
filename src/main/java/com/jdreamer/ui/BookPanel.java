@@ -35,12 +35,14 @@ public class BookPanel extends JPanel {
     private Map<Integer, Integer> currentPages = new HashMap<>();
     private Map<Integer, Float> zoomFactors = new HashMap<>();
 
-    private BookService bookService;
+    private final BookService bookService;
+    private final BookOrPageChangeListener listener;
 
-    public BookPanel(BookService bookService) {
+    public BookPanel(BookService bookService, BookOrPageChangeListener listener) {
         super(new BorderLayout());
 
         this.bookService = bookService;
+        this.listener = listener;
 
         buildUI();
 
@@ -252,7 +254,8 @@ public class BookPanel extends JPanel {
             currentPages.put(bookId, pageIndex);
             // Save current page to session
             saveSessionPage(bookId, pageIndex);
-            loadDataByPage(pageIndex);
+
+            listener.onBookOrPageChange(bookId, pageIndex);
         } catch (IOException e) {
             e.printStackTrace();
             JOptionPane.showMessageDialog(this, "Failed to render PDF page: " + e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
@@ -379,10 +382,6 @@ public class BookPanel extends JPanel {
                 }
             }
         }
-    }
-
-    private void loadDataByPage(int page) {
-
     }
 
     private void saveSessionPage(int bookId, int page) {

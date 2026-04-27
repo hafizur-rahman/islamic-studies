@@ -17,7 +17,7 @@ public class NounPanel extends JPanel {
         buildUI();
     }
 
-    public void buildUI() {
+    private void buildUI() {
         nounsModel = new NounTableModel(Collections.emptyList());
 
         JTable nounsTable = new JTable(nounsModel);
@@ -39,5 +39,7 @@ public class NounPanel extends JPanel {
 
     public void loadData(List<Noun> nouns) {
         nounsModel.updateData(nouns);
+
+        nounsModel.addEmptyRowAtEnd();
     }
 }

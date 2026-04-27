@@ -7,16 +7,18 @@ import javax.swing.*;
 import java.awt.*;
 import java.util.List;
 
-public class NotesPanel extends JPanel {
+public class NotesPanel extends JPanel implements BookOrPageChangeListener{
     private final BookService bookService;
+
     private JTextArea translationArea;
     private NounPanel nounPanel;
 
     public NotesPanel(BookService bookService) {
         super(new BorderLayout());
 
-        this.bookService = bookService;
         buildUI();
+
+        this.bookService = bookService;
     }
 
     private void buildUI() {
@@ -45,7 +47,8 @@ public class NotesPanel extends JPanel {
     }
 
     public void onBookOrPageChange(int bookId, int pageId) {
-        List<Noun> nouns = this.bookService.findNounsByBookIdAndPageId(bookId, pageId);
+        List<Noun> nouns = bookService.findNounsByBookIdAndPageId(bookId, pageId);
+
         nounPanel.loadData(nouns);
     }
 }
