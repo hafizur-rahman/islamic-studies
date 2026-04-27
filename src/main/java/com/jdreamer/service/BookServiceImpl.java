@@ -12,6 +12,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 public class BookServiceImpl implements BookService {
@@ -40,6 +41,17 @@ public class BookServiceImpl implements BookService {
     }
 
     @Override
+    public void save(Noun noun) {
+        Optional<Noun> n = nounRepository.findBySingular(noun.getSingular());
+
+        if (n.isPresent()) {
+            noun.setId(n.get().getId());
+        }
+
+        nounRepository.save(noun);
+    }
+
+    @Override
     public Book findBookByFilePath(String filePath) {
         return bookRepository.findByFilePath(filePath);
     }
@@ -57,5 +69,10 @@ public class BookServiceImpl implements BookService {
     @Override
     public List<Noun> findNounsByBookIdAndPageId(int bookId, int pageId) {
         return nounRepository.findNounsByBookIdAndPageId(bookId, pageId);
+    }
+
+    @Override
+    public void saveAll(List<Noun> nouns) {
+        nounRepository.saveAll(nouns);
     }
 }

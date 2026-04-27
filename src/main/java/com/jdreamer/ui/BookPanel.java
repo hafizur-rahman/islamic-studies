@@ -3,6 +3,7 @@ package com.jdreamer.ui;
 import com.jdreamer.model.Book;
 import com.jdreamer.model.UserSession;
 import com.jdreamer.service.BookService;
+import com.jdreamer.ui.model.BookOrPageChangeListener;
 import org.apache.pdfbox.Loader;
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.rendering.PDFRenderer;

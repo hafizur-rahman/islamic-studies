@@ -1,21 +1,25 @@
 package com.jdreamer.ui.model;
 
 import com.jdreamer.model.Noun;
+import com.jdreamer.service.BookService;
 
 import javax.swing.table.AbstractTableModel;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
 public class NounTableModel extends AbstractTableModel {
+    private BookService bookService;
 
     private final String[] columns = {"ID", "Meaning", "Plural", "Dual", "Singular", "BookID", "PageID"};
     // Use a private final list to ensure we control the data source
     private final List<Noun> nouns;
 
-    public NounTableModel(List<Noun> nouns) {
+    public NounTableModel(List<Noun> nouns, BookService bookService) {
         // We wrap the input list in a new ArrayList to ensure it is MUTABLE.
         // This prevents UnsupportedOperationException if List.of() or Arrays.asList() was passed.
         this.nouns = (nouns != null) ? new ArrayList<>(nouns) : new ArrayList<>();
+        this.bookService = bookService;
     }
 
     @Override
@@ -51,6 +55,10 @@ public class NounTableModel extends AbstractTableModel {
 
     @Override
     public boolean isCellEditable(int row, int col) {
+        if (col == 0) {
+            return false;
+        }
+
         return true;
     }
 
@@ -106,18 +114,22 @@ public class NounTableModel extends AbstractTableModel {
      * Adds a new row at the end of the existing non-empty rows.
      * Creates a blank Noun object to act as a template for the user.
      */
-    public void addEmptyRowAtEnd() {
-        // If the requirement is specifically "at the end of non-empty rows",
-        // we check if the list is not empty.
-        //if (!nouns.isEmpty()) {
-            Noun newNoun = new Noun(); // Assumes a default constructor exists
+    public void addEmptyRowAtEnd(int bookId, int pageId) {
+        if (nouns.isEmpty() || nouns.getLast().getSingular() != null) {
             int newIndex = nouns.size();
+
+            Noun newNoun = new Noun(); // Assumes a default constructor exists
+
+            newNoun.setBookId(bookId);
+            newNoun.setPageId(pageId);
+
             nouns.add(newNoun);
+
             fireTableRowsInserted(newIndex, newIndex);
 
             // Optional: You could add logic here to automatically
             // select the new row in the JTable via the UI controller.
-        //}
+        }
     }
 
     public void addWord(Noun n) {

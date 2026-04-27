@@ -10,7 +10,7 @@ import jakarta.persistence.*;
 public class Noun {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    long id;
+    int id;
 
     @Column(name = "BOOK_ID")
     int bookId;

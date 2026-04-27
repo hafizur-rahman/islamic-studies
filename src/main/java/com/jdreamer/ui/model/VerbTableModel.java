@@ -52,6 +52,10 @@ public class VerbTableModel extends AbstractTableModel {
     // Optional: allow editing
     @Override
     public boolean isCellEditable(int row, int col) {
+        if (col == 0) {
+            return false;
+        }
+
         return true;
     }
 

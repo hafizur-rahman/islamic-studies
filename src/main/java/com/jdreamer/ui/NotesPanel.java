@@ -2,12 +2,13 @@ package com.jdreamer.ui;
 
 import com.jdreamer.model.Noun;
 import com.jdreamer.service.BookService;
+import com.jdreamer.ui.model.BookOrPageChangeListener;
 
 import javax.swing.*;
 import java.awt.*;
 import java.util.List;
 
-public class NotesPanel extends JPanel implements BookOrPageChangeListener{
+public class NotesPanel extends JPanel implements BookOrPageChangeListener {
     private final BookService bookService;
 
     private JTextArea translationArea;
@@ -16,9 +17,9 @@ public class NotesPanel extends JPanel implements BookOrPageChangeListener{
     public NotesPanel(BookService bookService) {
         super(new BorderLayout());
 
-        buildUI();
-
         this.bookService = bookService;
+
+        buildUI();
     }
 
     private void buildUI() {
@@ -30,7 +31,7 @@ public class NotesPanel extends JPanel implements BookOrPageChangeListener{
 
         JPanel tablesPanel = new JPanel(new GridLayout(2, 1, 8, 8));
 
-        nounPanel = new NounPanel();
+        nounPanel = new NounPanel(bookService);
 
         tablesPanel.add(new VerbPanel());
         tablesPanel.add(nounPanel);
@@ -47,8 +48,10 @@ public class NotesPanel extends JPanel implements BookOrPageChangeListener{
     }
 
     public void onBookOrPageChange(int bookId, int pageId) {
+        nounPanel.saveData();
+
         List<Noun> nouns = bookService.findNounsByBookIdAndPageId(bookId, pageId);
 
-        nounPanel.loadData(nouns);
+        nounPanel.loadData(nouns, bookId, pageId);
     }
 }
