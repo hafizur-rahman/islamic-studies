@@ -232,7 +232,9 @@ public class BookPanel extends JPanel {
         }
 
         int pageCount = doc.getNumberOfPages();
-        if (pageIndex < 0 || pageIndex >= pageCount) {
+        if (pageIndex < 0) {
+            pageIndex = 0;
+        } else if (pageIndex >= pageCount) {
             pageIndex = Math.min(pageIndex, pageCount - 1);
         }
 
