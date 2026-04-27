@@ -1,14 +1,18 @@
 package com.jdreamer.ui;
 
+import com.jdreamer.service.BookService;
+
 import javax.swing.*;
 import java.awt.*;
 
 public class NotesPanel extends JPanel {
+    private final BookService bookService;
     private JTextArea translationArea;
 
-    public NotesPanel() {
+    public NotesPanel(BookService bookService) {
         super(new BorderLayout());
-        
+
+        this.bookService = bookService;
         buildUI();
     }
 
@@ -21,7 +25,7 @@ public class NotesPanel extends JPanel {
 
         JPanel tablesPanel = new JPanel(new GridLayout(2, 1, 8, 8));
         tablesPanel.add(new VerbPanel());
-        tablesPanel.add(new NounPanel());
+        tablesPanel.add(new NounPanel(bookService));
         tablesPanel.setBorder(BorderFactory.createTitledBorder("Language Data (Optional Editable)"));
 
         JButton saveDataBtn = new JButton("Save Data to DB");

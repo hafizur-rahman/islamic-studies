@@ -20,7 +20,7 @@ public class MainWindow extends JFrame {
         setLayout(new BorderLayout());
 
         BookPanel bookPanel = new BookPanel(bookService);
-        NotesPanel notesPanel = new NotesPanel();
+        NotesPanel notesPanel = new NotesPanel(bookService);
 
         JSplitPane splitPane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, bookPanel, notesPanel);
         splitPane.setDividerLocation(900);

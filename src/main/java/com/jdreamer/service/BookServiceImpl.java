@@ -1,18 +1,25 @@
 package com.jdreamer.service;
 
 import com.jdreamer.model.Book;
+import com.jdreamer.model.Noun;
 import com.jdreamer.model.UserSession;
 import com.jdreamer.repository.BookRepository;
+import com.jdreamer.repository.NounRepository;
 import com.jdreamer.repository.UserSessionRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+
 import java.util.ArrayList;
+import java.util.List;
 
 @Service
 public class BookServiceImpl implements BookService {
     @Autowired
     BookRepository bookRepository;
+
+    @Autowired
+    NounRepository nounRepository;
 
     @Autowired
     UserSessionRepository userSessionRepository;
@@ -45,5 +52,10 @@ public class BookServiceImpl implements BookService {
     @Override
     public void saveSession(UserSession session) {
         userSessionRepository.save(session);
+    }
+
+    @Override
+    public List<Noun> findNounsByBookIdAndPageId(int bookId, int pageId) {
+        return nounRepository.findNounsByBookIdAndPageId(bookId, pageId);
     }
 }

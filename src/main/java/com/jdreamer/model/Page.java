@@ -15,8 +15,8 @@ public class Page {
     @Column(name = "BOOK_ID")
     int bookId;
 
-    @Column(name = "PAGE_NUMBER")
-    int pageNumber;
+    @Column(name = "PAGE_ID")
+    int pageId;
 
     @Column(name = "CONTENT")
     String content;
