@@ -41,7 +41,7 @@ public class NotesPanel extends JPanel implements BookOrPageChangeListener {
         JPanel topLeft = new JPanel(new BorderLayout(4, 4));
         topLeft.add(translationScroll, BorderLayout.NORTH);
         topLeft.add(tablesPanel, BorderLayout.CENTER);
-        
+
         add(topLeft, BorderLayout.CENTER);
     }
 
