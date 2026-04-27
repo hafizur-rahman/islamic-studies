@@ -1,12 +1,16 @@
 package com.jdreamer.ui;
 
+import com.jdreamer.model.Noun;
+import com.jdreamer.model.Verb;
+import com.jdreamer.ui.model.VerbTableModel;
+
 import javax.swing.*;
-import javax.swing.table.DefaultTableModel;
 import java.awt.*;
+import java.util.Collections;
+import java.util.List;
 
 public class VerbPanel extends JPanel {
-    private JTable verbsTable;
-    private DefaultTableModel verbsModel;
+    private VerbTableModel verbsModel;
 
     public VerbPanel() {
         super(new BorderLayout());
@@ -15,8 +19,9 @@ public class VerbPanel extends JPanel {
     }
 
     private void buildUI() {
-        verbsModel = new DefaultTableModel(new Object[]{"Bab", "English", "Command", "Present", "Past", "BookID", "PageID"}, 0);
-        verbsTable = new JTable(verbsModel);
+        verbsModel = new VerbTableModel(Collections.emptyList());
+
+        JTable verbsTable = new JTable(verbsModel);
         verbsTable.setFont(new Font("Arial", Font.PLAIN, 14));
         verbsTable.setRowHeight(24);
         verbsTable.getTableHeader().setFont(new Font("Arial", Font.BOLD, 14));
@@ -26,5 +31,9 @@ public class VerbPanel extends JPanel {
 
         add(new JScrollPane(verbsTable), BorderLayout.CENTER);
         add(addVerbBtn, BorderLayout.SOUTH);
+    }
+
+    public void loadData(List<Verb> verbs) {
+        verbsModel.updateData(verbs);
     }
 }
