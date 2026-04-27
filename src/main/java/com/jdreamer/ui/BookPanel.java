@@ -26,6 +26,8 @@ public class BookPanel extends JPanel {
     private int currentBookId = -1;
 
     private JTabbedPane booksTabbedPane;
+    private JTextField pageIdField;
+
     private int currentPage = 0;
     private PDDocument currentDocument;
     private Map<Integer, PDDocument> loadedPdfs = new HashMap<>();
@@ -115,6 +117,8 @@ public class BookPanel extends JPanel {
         JPanel toolbar = new JPanel(new FlowLayout(FlowLayout.LEFT));
 
         JButton prevPageBtn = new JButton("Previous");
+        pageIdField = new JTextField(currentPages.getOrDefault(currentBookId, 0));
+        pageIdField.setColumns(5);
         JButton nextPageBtn = new JButton("Next");
         JButton zoomInBtn = new JButton("Zoom In");
         JButton zoomOutBtn = new JButton("Zoom Out");
@@ -123,17 +127,21 @@ public class BookPanel extends JPanel {
 
         prevPageBtn.addActionListener(e -> showPageForBook(currentBookId, currentPages.getOrDefault(currentBookId, 0) - 1));
         nextPageBtn.addActionListener(e -> showPageForBook(currentBookId, currentPages.getOrDefault(currentBookId, 0) + 1));
+        pageIdField.addActionListener(e -> showPageForBook(currentBookId, Integer.parseInt(pageIdField.getText())));
+
         zoomInBtn.addActionListener(e -> zoomInForBook(currentBookId));
         zoomOutBtn.addActionListener(e -> zoomOutForBook(currentBookId));
         resetZoomBtn.addActionListener(e -> resetZoomForBook(currentBookId));
         closeBtn.addActionListener(e -> closeBook(currentBookId));
 
-        toolbar.add(prevPageBtn);
-        toolbar.add(nextPageBtn);
         toolbar.add(zoomInBtn);
         toolbar.add(zoomOutBtn);
         toolbar.add(resetZoomBtn);
         toolbar.add(closeBtn);
+
+        toolbar.add(prevPageBtn);
+        toolbar.add(pageIdField);
+        toolbar.add(nextPageBtn);
 
         return toolbar;
     }
@@ -225,8 +233,10 @@ public class BookPanel extends JPanel {
 
         int pageCount = doc.getNumberOfPages();
         if (pageIndex < 0 || pageIndex >= pageCount) {
-            return;
+            pageIndex = Math.min(pageIndex, pageCount - 1);
         }
+
+        pageIdField.setText(String.valueOf(pageIndex));
 
         try {
             float bookZoom = zoomFactors.getOrDefault(bookId, 1.0f);
