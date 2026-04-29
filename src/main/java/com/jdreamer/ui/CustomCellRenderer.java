@@ -20,7 +20,7 @@ public class CustomCellRenderer extends DefaultTableCellRenderer {
         if (arabicCells.contains(column)) {
             c.setFont(new Font("Arial", Font.BOLD, 20));
         } else {
-            c.setFont(new Font("Arial", Font.PLAIN, 16));
+            c.setFont(new Font("Arial", Font.PLAIN, 14));
         }
         return c;
     }

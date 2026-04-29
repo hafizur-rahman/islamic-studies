@@ -32,7 +32,7 @@ public class VerbPanel extends JPanel {
             verbsTable.getColumnModel().getColumn(columnId).setMaxWidth(0);
         }
 
-        final CustomCellRenderer renderer = new CustomCellRenderer(Set.of(2,3,4,5, 6, 7));
+        final CustomCellRenderer renderer = new CustomCellRenderer(Set.of(1, 3, 4, 5, 6, 7, 8));
         for (int columnIndex = 0; columnIndex < verbsTable.getColumnCount(); columnIndex++) {
             verbsTable.getColumnModel().getColumn(columnIndex).setCellRenderer(renderer);
         }
