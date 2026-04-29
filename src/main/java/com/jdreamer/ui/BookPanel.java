@@ -7,6 +7,7 @@ import com.jdreamer.ui.model.BookOrPageChangeListener;
 import org.apache.pdfbox.Loader;
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.rendering.PDFRenderer;
+import org.hsqldb.rights.User;
 
 import javax.swing.*;
 import javax.swing.tree.TreePath;
@@ -32,7 +33,6 @@ public class BookPanel extends JPanel {
     private PDDocument currentDocument;
     private Map<Integer, PDDocument> loadedPdfs = new HashMap<>();
     private Map<Integer, JLabel> pdfLabels = new HashMap<>();
-    private Map<Integer, Integer> currentPages = new HashMap<>();
 
     private Map<Integer, UserSession> userSessions = new HashMap<>();
 
@@ -97,16 +97,21 @@ public class BookPanel extends JPanel {
 
     private void createTabbedPane() {
         booksTabbedPane = new JTabbedPane();
+
         booksTabbedPane.addChangeListener(e -> {
             int selectedIndex = booksTabbedPane.getSelectedIndex();
+
             if (selectedIndex >= 0 && selectedIndex < booksTabbedPane.getTabCount()) {
                 String tabTitle = booksTabbedPane.getTitleAt(selectedIndex);
+
                 // Extract book ID from tab title (format: "Title (ID: bookId)")
                 int idStartPos = tabTitle.lastIndexOf("ID: ");
                 if (idStartPos != -1) {
                     String idStr = tabTitle.substring(idStartPos + 4, tabTitle.length() - 1);
                     try {
                         currentBookId = Integer.parseInt(idStr);
+
+
 
                         switchToBook(currentBookId);
                     } catch (NumberFormatException ex) {
@@ -121,17 +126,32 @@ public class BookPanel extends JPanel {
         JPanel toolbar = new JPanel(new FlowLayout(FlowLayout.LEFT));
 
         JButton prevPageBtn = new JButton("Previous");
-        pageIdField = new JTextField(currentPages.getOrDefault(currentBookId, 0));
+
+        pageIdField = new JTextField();
         pageIdField.setColumns(5);
+
         JButton nextPageBtn = new JButton("Next");
         JButton zoomInBtn = new JButton("Zoom In");
         JButton zoomOutBtn = new JButton("Zoom Out");
         JButton resetZoomBtn = new JButton("Reset Zoom");
         JButton closeBtn = new JButton("Close");
 
-        prevPageBtn.addActionListener(e -> showPageForBook(currentBookId, currentPages.getOrDefault(currentBookId, 0) - 1));
-        nextPageBtn.addActionListener(e -> showPageForBook(currentBookId, currentPages.getOrDefault(currentBookId, 0) + 1));
-        pageIdField.addActionListener(e -> showPageForBook(currentBookId, Integer.parseInt(pageIdField.getText())));
+        prevPageBtn.addActionListener(e -> {
+            UserSession session = getOrCreateUserSession(currentBookId);
+            if (session != null) {
+                showPageForBook(currentBookId, session.getPageId() - 1);
+            }
+        });
+
+        nextPageBtn.addActionListener(e -> {
+            UserSession session = getOrCreateUserSession(currentBookId);
+            if (session != null) {
+                showPageForBook(currentBookId, session.getPageId() + 1);
+            }
+        });
+        pageIdField.addActionListener(e -> {
+            showPageForBook(currentBookId, Integer.parseInt(pageIdField.getText()));
+        });
 
         zoomInBtn.addActionListener(e -> zoomInForBook(currentBookId));
         zoomOutBtn.addActionListener(e -> zoomOutForBook(currentBookId));
@@ -167,25 +187,9 @@ public class BookPanel extends JPanel {
             createOrUpdateBookTab(currentBookId, fileName);
 
             // Initialize book-specific data
-            UserSession session = bookService.findUserSessionByBookId(currentBookId);
+            UserSession session = getOrCreateUserSession(currentBookId);
+            bookService.saveSession(session);
 
-            if (session == null) {
-                session = new UserSession();
-                session.setBookId(currentBookId);
-                session.setPageId(0);
-                session.setZoomFactor(1.0f);
-                session.setAccessedAt(System.currentTimeMillis());
-
-                bookService.saveSession(session);
-            }
-
-            userSessions.put(currentBookId, session);
-
-            int lastPage = session.getPageId();
-            currentPage = Math.min(lastPage, currentDocument.getNumberOfPages() - 1);
-            currentPages.put(currentBookId, currentPage);
-
-            // Switch to the book
             switchToBook(currentBookId);
         } catch (IOException e) {
             e.printStackTrace();
@@ -257,9 +261,9 @@ public class BookPanel extends JPanel {
         pageIdField.setText(String.valueOf(pageIndex));
 
         try {
-            UserSession session = userSessions.get(bookId);
+            UserSession session = getOrCreateUserSession(bookId);
 
-            float bookZoom = session != null ? session.getZoomFactor() : 1.0f;
+            float bookZoom = session.getZoomFactor();
 
             PDFRenderer renderer = new PDFRenderer(doc);
             BufferedImage img = renderer.renderImageWithDPI(pageIndex, 95 * bookZoom);
@@ -267,10 +271,12 @@ public class BookPanel extends JPanel {
             label.setIcon(new ImageIcon(img));
             label.setText(null);
 
-            currentPages.put(bookId, pageIndex);
+            session.setPageId(pageIndex);
 
             // Save current page to session
-            saveSessionPage(bookId, pageIndex, bookZoom);
+            session.setAccessedAt(System.currentTimeMillis());
+
+            bookService.saveSession(session);
 
             listener.onBookOrPageChange(bookId, pageIndex);
         } catch (IOException e) {
@@ -279,16 +285,33 @@ public class BookPanel extends JPanel {
         }
     }
 
+    private UserSession getOrCreateUserSession(int bookId) {
+        if (userSessions.containsKey(bookId)) {
+            return userSessions.get(bookId);
+        }
+
+        UserSession session = bookService.findUserSessionByBookId(bookId);
+        if (session == null) {
+            session = new UserSession();
+            session.setBookId(bookId);
+            session.setAccessedAt(System.currentTimeMillis());
+        }
+
+        userSessions.put(bookId, session);
+
+        return session;
+    }
+
     private void switchToBook(int bookId) {
         if (!loadedPdfs.containsKey(bookId)) {
             return;
         }
 
-        UserSession session = bookService.findUserSessionByBookId(bookId);
+        UserSession session = getOrCreateUserSession(bookId);
 
         currentBookId = bookId;
         currentDocument = loadedPdfs.get(bookId);
-        currentPage = session != null ? session.getPageId() : currentPages.getOrDefault(bookId, 0);
+        currentPage = session != null ? session.getPageId() : 0;
 
         // Update tab selection
         for (int i = 0; i < booksTabbedPane.getTabCount(); i++) {
@@ -338,7 +361,7 @@ public class BookPanel extends JPanel {
     }
 
     private void zoomInForBook(int bookId) {
-        UserSession session = userSessions.get(bookId);
+        UserSession session = getOrCreateUserSession(bookId);
 
         if (session != null) {
             float zoom = session.getZoomFactor();
@@ -346,12 +369,12 @@ public class BookPanel extends JPanel {
             if (zoom > 5.0f) zoom = 5.0f;
 
             session.setZoomFactor(zoom);
-            showPageForBook(bookId, currentPages.getOrDefault(bookId, 0));
+            showPageForBook(bookId, session.getPageId());
         }
     }
 
     private void zoomOutForBook(int bookId) {
-        UserSession session = userSessions.get(bookId);
+        UserSession session = getOrCreateUserSession(bookId);
 
         if (session != null) {
             float zoom = session.getZoomFactor();
@@ -361,18 +384,18 @@ public class BookPanel extends JPanel {
             if (zoom < 0.1f) zoom = 0.1f;
 
             session.setZoomFactor(zoom);
-            showPageForBook(bookId, currentPages.getOrDefault(bookId, 0));
+            showPageForBook(bookId, session.getPageId());
         }
     }
 
     private void resetZoomForBook(int bookId) {
-        UserSession session = userSessions.get(bookId);
+        UserSession session = getOrCreateUserSession(bookId);
 
         if (session != null) {
             float zoom = 1.0f;
 
             session.setZoomFactor(zoom);
-            showPageForBook(bookId, currentPages.getOrDefault(bookId, 0));
+            showPageForBook(bookId, session.getPageId());
         }
     }
 
@@ -386,7 +409,6 @@ public class BookPanel extends JPanel {
 
             loadedPdfs.remove(bookId);
             pdfLabels.remove(bookId);
-            currentPages.remove(bookId);
 
             UserSession session = userSessions.get(bookId);
             if (session != null){
@@ -421,20 +443,5 @@ public class BookPanel extends JPanel {
                 }
             }
         }
-    }
-
-    private void saveSessionPage(int bookId, int page, float bookZoom) {
-        UserSession session = userSessions.get(bookId);
-
-        if (session == null) {
-            session = new UserSession();
-            session.setBookId(bookId);
-            session.setZoomFactor(bookZoom);
-        }
-
-        session.setPageId(page);
-        session.setAccessedAt(System.currentTimeMillis());
-
-        bookService.saveSession(session);
     }
 }
