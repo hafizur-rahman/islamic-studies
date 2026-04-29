@@ -1,13 +1,10 @@
 package com.jdreamer.ui;
 
-import com.jdreamer.model.Noun;
-import com.jdreamer.model.Verb;
 import com.jdreamer.service.BookService;
 import com.jdreamer.ui.model.BookOrPageChangeListener;
 
 import javax.swing.*;
 import java.awt.*;
-import java.util.List;
 
 public class NotesPanel extends JPanel implements BookOrPageChangeListener {
     private final BookService bookService;
