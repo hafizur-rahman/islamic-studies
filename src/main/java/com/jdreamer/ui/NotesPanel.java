@@ -49,10 +49,7 @@ public class NotesPanel extends JPanel implements BookOrPageChangeListener {
         verbPanel.saveData();
         nounPanel.saveData();
 
-        List<Noun> nouns = bookService.findNounsByBookIdAndPageId(bookId, pageId);
-        nounPanel.loadData(nouns, bookId, pageId);
-
-        List<Verb> verbs = bookService.findVerbsByBookIdAndPageId(bookId, pageId);
-        verbPanel.loadData(verbs, bookId, pageId);
+        nounPanel.changePage(bookId, pageId);
+        verbPanel.changePage(bookId, pageId);
     }
 }

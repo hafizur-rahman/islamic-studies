@@ -57,6 +57,19 @@ public class BookServiceImpl implements BookService {
     }
 
     @Override
+    public void save(Verb verb) {
+        Optional<Verb> v = verbRepository.findByWord(verb.getWord());
+
+        if (v.isPresent()) {
+            verb.setId(v.get().getId());
+        }
+
+        verbRepository.save(verb);
+    }
+
+
+
+    @Override
     public Book findBookByFilePath(String filePath) {
         return bookRepository.findByFilePath(filePath);
     }

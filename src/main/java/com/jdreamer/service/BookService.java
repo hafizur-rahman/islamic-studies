@@ -17,6 +17,8 @@ public interface BookService {
 
     void save(Noun noun);
 
+    void save(Verb verb);
+
     Book findBookByFilePath(String filePath);
 
     UserSession findUserSessionByBookId(int bookId);
