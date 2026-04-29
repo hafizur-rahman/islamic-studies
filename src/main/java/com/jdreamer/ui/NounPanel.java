@@ -37,7 +37,7 @@ public class NounPanel extends JPanel {
             nounsTable.getColumnModel().getColumn(columnIndex).setCellRenderer(renderer);
         }
 
-        nounsTable.setRowHeight(24);
+        nounsTable.setRowHeight(28);
         nounsTable.getTableHeader().setFont(new Font("Arial", Font.BOLD, 16));
 
         add(new JScrollPane(nounsTable), BorderLayout.CENTER);

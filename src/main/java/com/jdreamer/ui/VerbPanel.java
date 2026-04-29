@@ -32,11 +32,11 @@ public class VerbPanel extends JPanel {
             verbsTable.getColumnModel().getColumn(columnId).setMaxWidth(0);
         }
 
-        final CustomCellRenderer renderer = new CustomCellRenderer(Set.of(2,3,4));
+        final CustomCellRenderer renderer = new CustomCellRenderer(Set.of(2,3,4,5, 6, 7));
         for (int columnIndex = 0; columnIndex < verbsTable.getColumnCount(); columnIndex++) {
             verbsTable.getColumnModel().getColumn(columnIndex).setCellRenderer(renderer);
         }
-        verbsTable.setRowHeight(24);
+        verbsTable.setRowHeight(28);
         verbsTable.getTableHeader().setFont(new Font("Arial", Font.BOLD, 14));
 
         add(new JScrollPane(verbsTable), BorderLayout.CENTER);
