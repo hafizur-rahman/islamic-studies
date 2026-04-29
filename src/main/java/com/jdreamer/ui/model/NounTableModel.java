@@ -1,7 +1,7 @@
 package com.jdreamer.ui.model;
 
 import com.jdreamer.model.Noun;
-import com.jdreamer.service.BookService;
+import lombok.Getter;
 
 import javax.swing.table.AbstractTableModel;
 import java.util.ArrayList;
@@ -11,6 +11,7 @@ public class NounTableModel extends AbstractTableModel {
 
     private final String[] columns = {"ID", "Meaning", "Plural", "Dual", "Singular", "BookID", "PageID"};
     // Use a private final list to ensure we control the data source
+    @Getter
     private final List<Noun> nouns;
 
     public NounTableModel(List<Noun> nouns) {
@@ -127,17 +128,5 @@ public class NounTableModel extends AbstractTableModel {
             // Optional: You could add logic here to automatically
             // select the new row in the JTable via the UI controller.
         }
-    }
-
-    public void addWord(Noun n) {
-        if (n != null) {
-            int idx = nouns.size();
-            nouns.add(n);
-            fireTableRowsInserted(idx, idx);
-        }
-    }
-
-    public List<Noun> getNouns() {
-        return nouns;
     }
 }

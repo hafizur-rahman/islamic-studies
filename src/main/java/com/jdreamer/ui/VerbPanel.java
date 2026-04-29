@@ -4,6 +4,7 @@ import com.jdreamer.model.Verb;
 import com.jdreamer.service.BookService;
 import com.jdreamer.ui.model.VerbTableModel;
 import com.jdreamer.ui.util.JTableUtil;
+import org.apache.commons.lang3.StringUtils;
 
 import javax.swing.*;
 import java.awt.*;
@@ -11,6 +12,7 @@ import java.awt.event.ActionEvent;
 import java.util.Collections;
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 public class VerbPanel extends JPanel {
     private BookService bookService;
@@ -40,8 +42,8 @@ public class VerbPanel extends JPanel {
         for (int columnIndex = 0; columnIndex < verbsTable.getColumnCount(); columnIndex++) {
             verbsTable.getColumnModel().getColumn(columnIndex).setCellRenderer(renderer);
         }
-        verbsTable.setRowHeight(28);
-        verbsTable.getTableHeader().setFont(new Font("Arial", Font.BOLD, 14));
+        verbsTable.setRowHeight(36);
+        verbsTable.getTableHeader().setFont(new Font("Arial", Font.BOLD, 12));
 
         add(new JScrollPane(verbsTable), BorderLayout.CENTER);
 
@@ -54,7 +56,7 @@ public class VerbPanel extends JPanel {
                 int selectedRow = verbsTable.getSelectedRow();
                 if (selectedRow != -1) {
                     Verb verb = verbsModel.getVerbs().get(selectedRow);
-                    if (verb != null && !verb.getWord().isBlank() && !verb.getWord().isEmpty()) {
+                    if (verb != null && !verb.getWord().isBlank()) {
                         bookService.save(verb);
                     }
 
@@ -77,7 +79,9 @@ public class VerbPanel extends JPanel {
     }
 
     public void saveData() {
-        List<Verb> verbs = verbsModel.getVerbs();
+        List<Verb> verbs = verbsModel.getVerbs().stream()
+                .filter(verb -> !StringUtils.isBlank(verb.getWord()))
+                .collect(Collectors.toList());
 
         bookService.saveVerbs(verbs);
     }

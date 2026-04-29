@@ -1,18 +1,21 @@
 package com.jdreamer.ui.model;
 
-import com.jdreamer.model.Noun;
 import com.jdreamer.model.Verb;
+import lombok.Getter;
 
 import javax.swing.table.AbstractTableModel;
+import java.util.ArrayList;
 import java.util.List;
 
 public class VerbTableModel extends AbstractTableModel {
 
     private final String[] columns = {"ID", "Bab", "Meaning", "Masdar", "Command", "Present", "Past", "Word", "BookID", "PageID"};
-    private List<Verb> verbs;          // Word is a POJO
+
+    @Getter
+    private final List<Verb> verbs;          // Word is a POJO
 
     public VerbTableModel(List<Verb> verbs) {
-        this.verbs = verbs;
+        this.verbs = (verbs != null) ? new ArrayList<>(verbs) : new ArrayList<>();
     }
 
     @Override
@@ -100,8 +103,11 @@ public class VerbTableModel extends AbstractTableModel {
     }
 
     /* --------------------- Utility --------------------- */
-    public void updateData(List<Verb> verbs) {
-        this.verbs = verbs;
+    public void updateData(List<Verb> newVerbs) {
+        this.verbs.clear();
+        if (newVerbs != null) {
+            this.verbs.addAll(newVerbs);
+        }
 
         fireTableDataChanged();
     }
@@ -128,7 +134,4 @@ public class VerbTableModel extends AbstractTableModel {
         }
     }
 
-    public List<Verb> getVerbs() {
-        return verbs;
-    }
 }

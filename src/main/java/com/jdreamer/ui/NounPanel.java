@@ -5,6 +5,7 @@ import com.jdreamer.model.Verb;
 import com.jdreamer.service.BookService;
 import com.jdreamer.ui.model.NounTableModel;
 import com.jdreamer.ui.util.JTableUtil;
+import org.apache.commons.lang3.StringUtils;
 
 import javax.swing.*;
 import java.awt.*;
@@ -12,6 +13,7 @@ import java.awt.event.ActionEvent;
 import java.util.Collections;
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 public class NounPanel extends JPanel {
     private BookService bookService;
@@ -42,8 +44,8 @@ public class NounPanel extends JPanel {
             nounsTable.getColumnModel().getColumn(columnIndex).setCellRenderer(renderer);
         }
 
-        nounsTable.setRowHeight(28);
-        nounsTable.getTableHeader().setFont(new Font("Arial", Font.BOLD, 16));
+        nounsTable.setRowHeight(36);
+        nounsTable.getTableHeader().setFont(new Font("Arial", Font.BOLD, 12));
 
         add(new JScrollPane(nounsTable), BorderLayout.CENTER);
 
@@ -55,9 +57,8 @@ public class NounPanel extends JPanel {
             public void actionPerformed(ActionEvent e) {
                 int selectedRow = nounsTable.getSelectedRow();
                 if (selectedRow != -1) {
-                    List<Noun> nouns = nounsModel.getNouns();
                     Noun noun = nounsModel.getNouns().get(selectedRow);
-                    if (noun != null && !noun.getSingular().isBlank() && !noun.getSingular().isEmpty()) {
+                    if (noun != null && !noun.getSingular().isBlank()) {
                         bookService.save(noun);
                     }
 
@@ -80,7 +81,9 @@ public class NounPanel extends JPanel {
     }
 
     public void saveData() {
-        List<Noun> nouns = nounsModel.getNouns();
+        List<Noun> nouns = nounsModel.getNouns().stream()
+                .filter(noun -> !StringUtils.isBlank(noun.getSingular()))
+                .collect(Collectors.toList());
 
         bookService.saveNouns(nouns);
     }

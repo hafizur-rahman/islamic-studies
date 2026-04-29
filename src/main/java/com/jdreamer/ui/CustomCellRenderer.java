@@ -18,7 +18,7 @@ public class CustomCellRenderer extends DefaultTableCellRenderer {
         Component c = super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
 
         if (arabicCells.contains(column)) {
-            c.setFont(new Font("Arial", Font.BOLD, 20));
+            c.setFont(new Font("Arial", Font.PLAIN, 24));
         } else {
             c.setFont(new Font("Arial", Font.PLAIN, 14));
         }
