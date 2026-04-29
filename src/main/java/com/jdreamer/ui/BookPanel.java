@@ -19,9 +19,8 @@ import java.awt.dnd.DropTargetDropEvent;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
-import java.util.HashMap;
+import java.util.*;
 import java.util.List;
-import java.util.Map;
 
 public class BookPanel extends JPanel {
     private int currentBookId = -1;
@@ -34,7 +33,8 @@ public class BookPanel extends JPanel {
     private Map<Integer, PDDocument> loadedPdfs = new HashMap<>();
     private Map<Integer, JLabel> pdfLabels = new HashMap<>();
     private Map<Integer, Integer> currentPages = new HashMap<>();
-    private Map<Integer, Float> zoomFactors = new HashMap<>();
+
+    private Map<Integer, UserSession> userSessions = new HashMap<>();
 
     private final BookService bookService;
     private final BookOrPageChangeListener listener;
@@ -107,6 +107,7 @@ public class BookPanel extends JPanel {
                     String idStr = tabTitle.substring(idStartPos + 4, tabTitle.length() - 1);
                     try {
                         currentBookId = Integer.parseInt(idStr);
+
                         switchToBook(currentBookId);
                     } catch (NumberFormatException ex) {
                         ex.printStackTrace();
@@ -167,10 +168,22 @@ public class BookPanel extends JPanel {
 
             // Initialize book-specific data
             UserSession session = bookService.findUserSessionByBookId(currentBookId);
-            int lastPage = (session != null) ? session.getPageId() : 0;
+
+            if (session == null) {
+                session = new UserSession();
+                session.setBookId(currentBookId);
+                session.setPageId(0);
+                session.setZoomFactor(1.0f);
+                session.setAccessedAt(System.currentTimeMillis());
+
+                bookService.saveSession(session);
+            }
+
+            userSessions.put(currentBookId, session);
+
+            int lastPage = session.getPageId();
             currentPage = Math.min(lastPage, currentDocument.getNumberOfPages() - 1);
             currentPages.put(currentBookId, currentPage);
-            zoomFactors.put(currentBookId, 1.0f);
 
             // Switch to the book
             switchToBook(currentBookId);
@@ -244,7 +257,9 @@ public class BookPanel extends JPanel {
         pageIdField.setText(String.valueOf(pageIndex));
 
         try {
-            float bookZoom = zoomFactors.getOrDefault(bookId, 1.0f);
+            UserSession session = userSessions.get(bookId);
+
+            float bookZoom = session != null ? session.getZoomFactor() : 1.0f;
 
             PDFRenderer renderer = new PDFRenderer(doc);
             BufferedImage img = renderer.renderImageWithDPI(pageIndex, 95 * bookZoom);
@@ -253,8 +268,9 @@ public class BookPanel extends JPanel {
             label.setText(null);
 
             currentPages.put(bookId, pageIndex);
+
             // Save current page to session
-            saveSessionPage(bookId, pageIndex);
+            saveSessionPage(bookId, pageIndex, bookZoom);
 
             listener.onBookOrPageChange(bookId, pageIndex);
         } catch (IOException e) {
@@ -322,24 +338,42 @@ public class BookPanel extends JPanel {
     }
 
     private void zoomInForBook(int bookId) {
-        float zoom = zoomFactors.getOrDefault(bookId, 1.0f);
-        zoom *= 1.2f;
-        if (zoom > 5.0f) zoom = 5.0f;
-        zoomFactors.put(bookId, zoom);
-        showPageForBook(bookId, currentPages.getOrDefault(bookId, 0));
+        UserSession session = userSessions.get(bookId);
+
+        if (session != null) {
+            float zoom = session.getZoomFactor();
+            zoom *= 1.2f;
+            if (zoom > 5.0f) zoom = 5.0f;
+
+            session.setZoomFactor(zoom);
+            showPageForBook(bookId, currentPages.getOrDefault(bookId, 0));
+        }
     }
 
     private void zoomOutForBook(int bookId) {
-        float zoom = zoomFactors.getOrDefault(bookId, 1.0f);
-        zoom /= 1.2f;
-        if (zoom < 0.1f) zoom = 0.1f;
-        zoomFactors.put(bookId, zoom);
-        showPageForBook(bookId, currentPages.getOrDefault(bookId, 0));
+        UserSession session = userSessions.get(bookId);
+
+        if (session != null) {
+            float zoom = session.getZoomFactor();
+
+            zoom /= 1.2f;
+
+            if (zoom < 0.1f) zoom = 0.1f;
+
+            session.setZoomFactor(zoom);
+            showPageForBook(bookId, currentPages.getOrDefault(bookId, 0));
+        }
     }
 
     private void resetZoomForBook(int bookId) {
-        zoomFactors.put(bookId, 1.0f);
-        showPageForBook(bookId, currentPages.getOrDefault(bookId, 0));
+        UserSession session = userSessions.get(bookId);
+
+        if (session != null) {
+            float zoom = 1.0f;
+
+            session.setZoomFactor(zoom);
+            showPageForBook(bookId, currentPages.getOrDefault(bookId, 0));
+        }
     }
 
     private void closeBook(int bookId) {
@@ -353,7 +387,11 @@ public class BookPanel extends JPanel {
             loadedPdfs.remove(bookId);
             pdfLabels.remove(bookId);
             currentPages.remove(bookId);
-            zoomFactors.remove(bookId);
+
+            UserSession session = userSessions.get(bookId);
+            if (session != null){
+                userSessions.remove(bookId);
+            }
 
             // Find and remove the tab
             for (int i = 0; i < booksTabbedPane.getTabCount(); i++) {
@@ -385,12 +423,13 @@ public class BookPanel extends JPanel {
         }
     }
 
-    private void saveSessionPage(int bookId, int page) {
-        UserSession session = bookService.findUserSessionByBookId(bookId);
+    private void saveSessionPage(int bookId, int page, float bookZoom) {
+        UserSession session = userSessions.get(bookId);
 
         if (session == null) {
             session = new UserSession();
             session.setBookId(bookId);
+            session.setZoomFactor(bookZoom);
         }
 
         session.setPageId(page);

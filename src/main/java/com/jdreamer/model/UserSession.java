@@ -3,15 +3,14 @@ package com.jdreamer.model;
 import lombok.Data;
 
 import jakarta.persistence.*;
+import lombok.EqualsAndHashCode;
 
 @Entity
 @Table(name = "USER_SESSION")
 @Data
+@EqualsAndHashCode(of = {"bookId"})
 public class UserSession {
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    long id;
-
     @Column(name = "BOOK_ID")
     int bookId;
 
@@ -20,4 +19,7 @@ public class UserSession {
 
     @Column(name = "ACCESSED_AT")
     long accessedAt;
+
+    @Column(name = "ZOOM_FACTOR")
+    float zoomFactor = 1.0f;
 }
