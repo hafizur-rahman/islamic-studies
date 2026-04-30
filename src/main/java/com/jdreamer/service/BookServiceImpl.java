@@ -103,4 +103,14 @@ public class BookServiceImpl implements BookService {
     public List<Verb> findVerbsByBookIdAndPageId(int bookId, int pageId) {
         return verbRepository.findNounsByBookIdAndPageId(bookId, pageId);
     }
+
+    @Override
+    public List<UserSession> findUserSessionsByOpenAtStartup() {
+        return userSessionRepository.findUserSessionsByOpenAtStartup(true);
+    }
+
+    @Override
+    public List<Book> findAllBooksByBookIds(List<Integer> bookIds) {
+        return bookRepository.findAllById(bookIds);
+    }
 }

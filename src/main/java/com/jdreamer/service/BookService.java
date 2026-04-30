@@ -32,4 +32,8 @@ public interface BookService {
     void saveVerbs(List<Verb> verbs);
 
     List<Verb> findVerbsByBookIdAndPageId(int bookId, int pageId);
+
+    List<UserSession> findUserSessionsByOpenAtStartup();
+
+    List<Book> findAllBooksByBookIds(List<Integer> bookIds);
 }

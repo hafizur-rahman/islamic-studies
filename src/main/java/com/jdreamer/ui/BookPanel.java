@@ -9,6 +9,7 @@ import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.rendering.PDFRenderer;
 import org.hsqldb.rights.User;
 
+import javax.persistence.criteria.CriteriaBuilder;
 import javax.swing.*;
 import javax.swing.tree.TreePath;
 import java.awt.*;
@@ -22,6 +23,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.*;
 import java.util.List;
+import java.util.stream.Collectors;
 
 public class BookPanel extends JPanel {
     private int currentBookId = -1;
@@ -48,6 +50,8 @@ public class BookPanel extends JPanel {
         buildUI();
 
         setupDragAndDrop();
+
+        loadBooksAtStartup();
     }
 
     private void buildUI() {
@@ -111,8 +115,6 @@ public class BookPanel extends JPanel {
                     try {
                         currentBookId = Integer.parseInt(idStr);
 
-
-
                         switchToBook(currentBookId);
                     } catch (NumberFormatException ex) {
                         ex.printStackTrace();
@@ -170,6 +172,20 @@ public class BookPanel extends JPanel {
         return toolbar;
     }
 
+    private void loadBooksAtStartup() {
+        List<UserSession> userSessions = bookService.findUserSessionsByOpenAtStartup();
+        List<Integer> bookIds = userSessions.stream().map(UserSession::getBookId).toList();
+
+        List<Book> books = bookService.findAllBooksByBookIds(bookIds);
+
+        for (Book book: books) {
+            String filePath = book.getFilePath();
+            File file = new File(filePath);
+
+            openPDF(file);
+        }
+    }
+
     private void openPDF(File file) {
         try {
             currentDocument = Loader.loadPDF(file);
@@ -188,6 +204,8 @@ public class BookPanel extends JPanel {
 
             // Initialize book-specific data
             UserSession session = getOrCreateUserSession(currentBookId);
+            session.setOpenAtStartup(true);
+
             bookService.saveSession(session);
 
             switchToBook(currentBookId);
@@ -275,6 +293,7 @@ public class BookPanel extends JPanel {
 
             // Save current page to session
             session.setAccessedAt(System.currentTimeMillis());
+            session.setOpenAtStartup(true);
 
             bookService.saveSession(session);
 
@@ -412,6 +431,9 @@ public class BookPanel extends JPanel {
 
             UserSession session = userSessions.get(bookId);
             if (session != null){
+                session.setOpenAtStartup(false);
+                bookService.saveSession(session);
+
                 userSessions.remove(bookId);
             }
 

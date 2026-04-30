@@ -22,4 +22,7 @@ public class UserSession {
 
     @Column(name = "ZOOM_FACTOR")
     float zoomFactor = 1.0f;
+
+    @Column(name = "OPEN_AT_STARTUP")
+    boolean openAtStartup;
 }
