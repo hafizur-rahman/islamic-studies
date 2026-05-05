@@ -9,7 +9,7 @@ import java.util.List;
 
 public class VerbTableModel extends AbstractTableModel {
 
-    private final String[] columns = {"ID", "Bab", "Meaning", "Masdar", "Command", "Present", "Past", "Word", "BookID", "PageID"};
+    private final String[] columns = {"ID", "باب", "معنى", "مصدر", "أمر", "مضارع", "ماضي", "كلمة", "BookID", "PageID"};
 
     @Getter
     private final List<Verb> verbs;          // Word is a POJO

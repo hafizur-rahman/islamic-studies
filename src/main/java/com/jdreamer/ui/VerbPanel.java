@@ -43,11 +43,11 @@ public class VerbPanel extends JPanel {
             verbsTable.getColumnModel().getColumn(columnIndex).setCellRenderer(renderer);
         }
         verbsTable.setRowHeight(36);
-        verbsTable.getTableHeader().setFont(new Font("Arial", Font.BOLD, 12));
+        verbsTable.getTableHeader().setFont(new Font("Arial", Font.BOLD, 18));
 
         add(new JScrollPane(verbsTable), BorderLayout.CENTER);
 
-        setBorder(BorderFactory.createTitledBorder("Verbs"));
+        setBorder(BorderFactory.createTitledBorder("فعل"));
 
         // Add key binding for Ctrl+S
         JTableUtil.addKeyBinding(verbsTable, "saveAction", KeyStroke.getKeyStroke("control S"), new AbstractAction() {

@@ -9,7 +9,7 @@ import java.util.List;
 
 public class NounTableModel extends AbstractTableModel {
 
-    private final String[] columns = {"ID", "Meaning", "Plural", "Dual", "Singular", "BookID", "PageID"};
+    private final String[] columns = {"ID", "معنى", "جمع", "تثنية", "واحد", "BookID", "PageID"};
     // Use a private final list to ensure we control the data source
     @Getter
     private final List<Noun> nouns;

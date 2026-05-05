@@ -26,7 +26,7 @@ public class NotesPanel extends JPanel implements BookOrPageChangeListener {
         translationArea.setLineWrap(true);
         translationArea.setWrapStyleWord(true);
         JScrollPane translationScroll = new JScrollPane(translationArea);
-        translationScroll.setBorder(BorderFactory.createTitledBorder("Translation (Editable)"));
+        translationScroll.setBorder(BorderFactory.createTitledBorder("Translation"));
 
         JPanel tablesPanel = new JPanel(new GridLayout(2, 1, 8, 8));
 

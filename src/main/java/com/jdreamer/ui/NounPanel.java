@@ -1,7 +1,6 @@
 package com.jdreamer.ui;
 
 import com.jdreamer.model.Noun;
-import com.jdreamer.model.Verb;
 import com.jdreamer.service.BookService;
 import com.jdreamer.ui.model.NounTableModel;
 import com.jdreamer.ui.util.JTableUtil;
@@ -16,7 +15,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 public class NounPanel extends JPanel {
-    private BookService bookService;
+    private final BookService bookService;
     private NounTableModel nounsModel;
 
     private int bookId = -1;
@@ -45,11 +44,11 @@ public class NounPanel extends JPanel {
         }
 
         nounsTable.setRowHeight(36);
-        nounsTable.getTableHeader().setFont(new Font("Arial", Font.BOLD, 12));
+        nounsTable.getTableHeader().setFont(new Font("Arial", Font.BOLD, 18));
 
         add(new JScrollPane(nounsTable), BorderLayout.CENTER);
 
-        setBorder(BorderFactory.createTitledBorder("Nouns"));
+        setBorder(BorderFactory.createTitledBorder("إسم"));
 
         // Add key binding for Ctrl+S
         JTableUtil.addKeyBinding(nounsTable, "saveAction", KeyStroke.getKeyStroke("control S"), new AbstractAction() {
