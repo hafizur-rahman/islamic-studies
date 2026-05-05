@@ -4,8 +4,6 @@ import com.jdreamer.service.BookService;
 import com.jdreamer.ui.MainWindow;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
-import mdlaf.MaterialLookAndFeel;
-import mdlaf.themes.MaterialLiteTheme;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -36,9 +34,13 @@ public class IslamicStudiesApp {
 
     private static void createAndShowGui(BookService bookService) {
         try {
-            UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
+            for (UIManager.LookAndFeelInfo info : UIManager.getInstalledLookAndFeels()) {
+                if ("Nimbus".equals(info.getName())) {
+                    UIManager.setLookAndFeel(info.getClassName());
+                    break;
+                }
+            }
         } catch (Exception e) {
-
         }
 
         JFrame frame = new MainWindow(bookService);
