@@ -25,4 +25,7 @@ public class UserSession {
 
     @Column(name = "OPEN_AT_STARTUP")
     boolean openAtStartup;
+
+    @Column(name = "PAGE_COUNT")
+    int pageCount;
 }

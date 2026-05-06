@@ -7,9 +7,7 @@ import com.jdreamer.ui.model.BookOrPageChangeListener;
 import org.apache.pdfbox.Loader;
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.rendering.PDFRenderer;
-import org.hsqldb.rights.User;
 
-import javax.persistence.criteria.CriteriaBuilder;
 import javax.swing.*;
 import javax.swing.tree.TreePath;
 import java.awt.*;
@@ -23,13 +21,14 @@ import java.io.File;
 import java.io.IOException;
 import java.util.*;
 import java.util.List;
-import java.util.stream.Collectors;
 
 public class BookPanel extends JPanel {
     private int currentBookId = -1;
 
     private JTabbedPane booksTabbedPane;
-    private JTextField pageIdField;
+    private final JTextField pageIdField = new JTextField();
+    private final JTextField pageCountField = new JTextField();
+
 
     private int currentPage = 0;
     private PDDocument currentDocument;
@@ -129,8 +128,9 @@ public class BookPanel extends JPanel {
 
         JButton prevPageBtn = new JButton("Previous");
 
-        pageIdField = new JTextField();
-        pageIdField.setColumns(5);
+        pageIdField.setColumns(3);
+        pageCountField.setEditable(false);
+
 
         JButton nextPageBtn = new JButton("Next");
         JButton zoomInBtn = new JButton("Zoom In");
@@ -167,6 +167,7 @@ public class BookPanel extends JPanel {
 
         toolbar.add(prevPageBtn);
         toolbar.add(pageIdField);
+        toolbar.add(pageCountField);
         toolbar.add(nextPageBtn);
 
         return toolbar;
@@ -277,6 +278,7 @@ public class BookPanel extends JPanel {
         }
 
         pageIdField.setText(String.valueOf(pageIndex));
+        pageCountField.setText("/ " + (pageCount - 1));
 
         try {
             UserSession session = getOrCreateUserSession(bookId);
@@ -290,6 +292,7 @@ public class BookPanel extends JPanel {
             label.setText(null);
 
             session.setPageId(pageIndex);
+            session.setPageCount(pageCount);
 
             // Save current page to session
             session.setAccessedAt(System.currentTimeMillis());
