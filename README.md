@@ -40,4 +40,4 @@ java -cp ".;lib/*" ArabicStudyApp
 
 - The DB file `arabic-study.db` is created automatically.
 - Use Save Data button to persist table/translation updates.
-- PDF load uses file chooser.
+- The application traverses file tree locally.
