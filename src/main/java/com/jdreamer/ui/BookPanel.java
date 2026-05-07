@@ -25,6 +25,9 @@ import java.util.List;
 public class BookPanel extends JPanel {
     private int currentBookId = -1;
 
+    private JButton showHideButton = new JButton("Show/Hide Tree");
+    private JScrollPane fileTreePane;
+
     private JTabbedPane booksTabbedPane;
     private final JTextField pageIdField = new JTextField();
     private final JTextField pageCountField = new JTextField();
@@ -56,7 +59,16 @@ public class BookPanel extends JPanel {
     private void buildUI() {
         FileSystemTree tree = creteFileSystemTree();
 
-        add(new JScrollPane(tree), BorderLayout.WEST);
+        fileTreePane = new JScrollPane(tree);
+
+        showHideButton.addActionListener(e -> {
+            fileTreePane.setVisible(!fileTreePane.isVisible());
+
+            this.revalidate();
+            this.repaint();
+        });
+
+        add(fileTreePane, BorderLayout.WEST);
 
         JPanel pdfView = new JPanel(new BorderLayout());
         pdfView.add(getToolbar(), BorderLayout.NORTH);
@@ -160,6 +172,7 @@ public class BookPanel extends JPanel {
         resetZoomBtn.addActionListener(e -> resetZoomForBook(currentBookId));
         closeBtn.addActionListener(e -> closeBook(currentBookId));
 
+        toolbar.add(showHideButton);
         toolbar.add(zoomInBtn);
         toolbar.add(zoomOutBtn);
         toolbar.add(resetZoomBtn);
