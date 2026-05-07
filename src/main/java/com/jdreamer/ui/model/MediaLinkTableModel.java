@@ -9,7 +9,7 @@ import java.util.List;
 
 public class MediaLinkTableModel extends AbstractTableModel {
 
-    private final String[] columns = {"ID", "BookID", "PageID"};
+    private final String[] columns = {"Select the cell and press <CTRL + P>", "BookID", "PageID"};
     // Use a private final list to ensure we control the data source
     @Getter
     private final List<MediaLink> mediaLinks;
