@@ -32,6 +32,7 @@ public class NotesPanel extends JPanel implements BookOrPageChangeListener {
 
         nounPanel = new NounPanel(bookService);
         verbPanel = new VerbPanel(bookService);
+
         tablesPanel.add(verbPanel);
         tablesPanel.add(nounPanel);
 

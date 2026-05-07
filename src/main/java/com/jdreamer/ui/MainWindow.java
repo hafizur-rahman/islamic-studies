@@ -1,9 +1,11 @@
 package com.jdreamer.ui;
 
 import com.jdreamer.service.BookService;
+import com.jdreamer.ui.model.BookOrPageChangeListener;
 
 import javax.swing.*;
 import java.awt.*;
+import java.util.ArrayList;
 
 public class MainWindow extends JFrame {
     private BookService bookService;
@@ -21,13 +23,17 @@ public class MainWindow extends JFrame {
 
         JTabbedPane tabbedPane = new JTabbedPane();
 
-        BrowserPanel browserPanel = new BrowserPanel();
-        tabbedPane.add("Video", browserPanel);
+        MediaPanel mediaPanel = new MediaPanel(bookService);
+        tabbedPane.add("Video", mediaPanel);
 
         NotesPanel notesPanel = new NotesPanel(bookService);
         tabbedPane.add("Notes", notesPanel);
 
-        BookPanel bookPanel = new BookPanel(bookService, notesPanel);
+        ArrayList<BookOrPageChangeListener> listeners = new ArrayList<>();
+        listeners.add(mediaPanel);
+        listeners.add(notesPanel);
+
+        BookPanel bookPanel = new BookPanel(bookService, listeners);
 
         JSplitPane splitPane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, bookPanel, tabbedPane);
         splitPane.setDividerLocation(1200);

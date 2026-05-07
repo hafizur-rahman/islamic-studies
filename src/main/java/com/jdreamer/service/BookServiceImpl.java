@@ -1,13 +1,7 @@
 package com.jdreamer.service;
 
-import com.jdreamer.model.Book;
-import com.jdreamer.model.Noun;
-import com.jdreamer.model.UserSession;
-import com.jdreamer.model.Verb;
-import com.jdreamer.repository.BookRepository;
-import com.jdreamer.repository.NounRepository;
-import com.jdreamer.repository.UserSessionRepository;
-import com.jdreamer.repository.VerbRepository;
+import com.jdreamer.model.*;
+import com.jdreamer.repository.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -28,12 +22,10 @@ public class BookServiceImpl implements BookService {
     VerbRepository verbRepository;
 
     @Autowired
-    UserSessionRepository userSessionRepository;
+    MediaLinkRepository mediaLinkRepository;
 
-    @Override
-    public ArrayList<Book> findAllBooks() {
-        return (ArrayList<Book>) bookRepository.findAll();
-    }
+    @Autowired
+    UserSessionRepository userSessionRepository;
 
     @Override
     public Book findBookById(int id) {
@@ -67,7 +59,16 @@ public class BookServiceImpl implements BookService {
         verbRepository.save(verb);
     }
 
+    @Override
+    public void save(MediaLink mediaLink) {
+        Optional<MediaLink> m = mediaLinkRepository.findById(mediaLink.getId());
 
+        if (m.isPresent()) {
+            mediaLink.setId(m.get().getId());
+        }
+
+        mediaLinkRepository.save(mediaLink);
+    }
 
     @Override
     public Book findBookByFilePath(String filePath) {
@@ -100,6 +101,11 @@ public class BookServiceImpl implements BookService {
     }
 
     @Override
+    public void saveMediaLinks(List<MediaLink> mediaLinks) {
+        mediaLinkRepository.saveAll(mediaLinks);
+    }
+
+    @Override
     public List<Verb> findVerbsByBookIdAndPageId(int bookId, int pageId) {
         return verbRepository.findNounsByBookIdAndPageId(bookId, pageId);
     }
@@ -112,5 +118,10 @@ public class BookServiceImpl implements BookService {
     @Override
     public List<Book> findAllBooksByBookIds(List<Integer> bookIds) {
         return bookRepository.findAllById(bookIds);
+    }
+
+    @Override
+    public List<MediaLink> findMediaLinksByBookIdAndPageId(int bookId, int pageId) {
+        return mediaLinkRepository.findMediaLinksByBookIdAndPageId(bookId, pageId);
     }
 }

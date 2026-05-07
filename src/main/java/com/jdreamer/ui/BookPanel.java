@@ -38,13 +38,13 @@ public class BookPanel extends JPanel {
     private Map<Integer, UserSession> userSessions = new HashMap<>();
 
     private final BookService bookService;
-    private final BookOrPageChangeListener listener;
+    private final List<BookOrPageChangeListener> listeners;
 
-    public BookPanel(BookService bookService, BookOrPageChangeListener listener) {
+    public BookPanel(BookService bookService, List<BookOrPageChangeListener> listeners) {
         super(new BorderLayout());
 
         this.bookService = bookService;
-        this.listener = listener;
+        this.listeners = listeners;
 
         buildUI();
 
@@ -300,7 +300,9 @@ public class BookPanel extends JPanel {
 
             bookService.saveSession(session);
 
-            listener.onBookOrPageChange(bookId, pageIndex);
+            for (BookOrPageChangeListener listener: listeners) {
+                listener.onBookOrPageChange(bookId, pageIndex);
+            }
         } catch (IOException e) {
             e.printStackTrace();
             JOptionPane.showMessageDialog(this, "Failed to render PDF page: " + e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
