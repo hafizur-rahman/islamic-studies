@@ -1,8 +1,6 @@
 package com.jdreamer.ui;
 
 import javafx.application.Platform;
-import javafx.beans.value.ChangeListener;
-import javafx.beans.value.ObservableValue;
 import javafx.concurrent.Worker;
 import javafx.embed.swing.JFXPanel;
 import javafx.scene.Scene;
@@ -41,26 +39,26 @@ public class BrowserPanel extends JFXPanel {
         final WebEngine webengine = webView.getEngine();
 
         webengine.getLoadWorker().stateProperty().addListener(
-                new ChangeListener<Worker.State>() {
-                    public void changed(ObservableValue ov, Worker.State oldState, Worker.State newState) {
-                        if (newState == Worker.State.SUCCEEDED) {
-                            Document doc = webengine.getDocument();
-                            try {
-                                Transformer transformer = TransformerFactory.newInstance().newTransformer();
-                                transformer.setOutputProperty(OutputKeys.OMIT_XML_DECLARATION, "no");
-                                transformer.setOutputProperty(OutputKeys.METHOD, "xml");
-                                transformer.setOutputProperty(OutputKeys.INDENT, "yes");
-                                transformer.setOutputProperty(OutputKeys.ENCODING, "UTF-8");
-                                transformer.setOutputProperty("{http://xml.apache.org/xslt}indent-amount", "4");
+                (ov, oldState, newState) -> {
+                    if (newState == Worker.State.SUCCEEDED) {
+                        Document doc = webengine.getDocument();
 
-                                transformer.transform(new DOMSource(doc),
-                                        new StreamResult(new OutputStreamWriter(new FileOutputStream("data.html"), "UTF-8")));
-                            } catch (Exception ex) {
-                                ex.printStackTrace();
-                            }
+                        try {
+                            Transformer transformer = TransformerFactory.newInstance().newTransformer();
+                            transformer.setOutputProperty(OutputKeys.OMIT_XML_DECLARATION, "no");
+                            transformer.setOutputProperty(OutputKeys.METHOD, "xml");
+                            transformer.setOutputProperty(OutputKeys.INDENT, "yes");
+                            transformer.setOutputProperty(OutputKeys.ENCODING, "UTF-8");
+                            transformer.setOutputProperty("{http://xml.apache.org/xslt}indent-amount", "4");
+
+                            transformer.transform(new DOMSource(doc),
+                                    new StreamResult(new OutputStreamWriter(new FileOutputStream("data.html"), "UTF-8")));
+                        } catch (Exception ex) {
+                            ex.printStackTrace();
                         }
                     }
                 });
+
         webengine.load("https://www.youtube.com/watch?v=" + videoId);
     }
 }
