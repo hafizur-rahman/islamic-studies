@@ -21,8 +21,8 @@ public class MediaPanel extends JPanel implements BookOrPageChangeListener  {
     }
 
     private void buildUI() {
-        mediaLinkPanel = new MediaLinkPanel(bookService);
         browserPanel = new BrowserPanel();
+        mediaLinkPanel = new MediaLinkPanel(bookService, browserPanel);
 
         add(browserPanel, BorderLayout.CENTER);
         add(mediaLinkPanel, BorderLayout.SOUTH);

@@ -36,73 +36,80 @@ public class BrowserPanel extends JFXPanel {
         Platform.runLater(() -> {
             webView = new WebView();
 
-            webView.getEngine().setJavaScriptEnabled(true);
+            final WebEngine webengine = webView.getEngine();
+
+            webengine.setJavaScriptEnabled(true);
             webView.setVisible(false);
+
+            webengine.getLoadWorker().stateProperty().addListener(
+                    (ov, oldState, newState) -> {
+                        if (webengine.getDocument() != null) {
+                            webengine.executeScript("document.querySelector('VIDEO').pause()");
+                        }
+
+                        if (newState == Worker.State.SUCCEEDED) {
+                            Document doc = webengine.getDocument();
+
+                            ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+
+                            try {
+                                Transformer transformer = TransformerFactory.newInstance().newTransformer();
+                                transformer.setOutputProperty(OutputKeys.OMIT_XML_DECLARATION, "no");
+                                transformer.setOutputProperty(OutputKeys.METHOD, "xml");
+                                transformer.setOutputProperty(OutputKeys.INDENT, "yes");
+                                transformer.setOutputProperty(OutputKeys.ENCODING, "UTF-8");
+                                transformer.setOutputProperty("{http://xml.apache.org/xslt}indent-amount", "4");
+
+                                transformer.transform(new DOMSource(doc),
+                                        new StreamResult(new OutputStreamWriter(outputStream, StandardCharsets.UTF_8)));
+
+                                String result = outputStream.toString(StandardCharsets.UTF_8);
+
+                                XMLInputFactory xmlInputFactory = XMLInputFactory.newInstance();
+                                XMLEventReader reader = xmlInputFactory.createXMLEventReader(new StringReader(result));
+
+                                while (reader.hasNext()) {
+                                    XMLEvent nextEvent = reader.nextEvent();
+
+                                    if (nextEvent.isStartElement()) {
+                                        StartElement startElement = nextEvent.asStartElement();
+
+                                        if ("video".equalsIgnoreCase(startElement.getName().getLocalPart())) {
+                                            Attribute url = startElement.getAttributeByName(new QName("src"));
+
+                                            if (url != null) {
+                                                setMediaUrl(url.getValue());
+
+                                                break;
+                                            }
+                                        }
+                                    }
+                                }
+                            } catch (Exception ex) {
+                                ex.printStackTrace();
+                            }
+                        }
+                    });
         });
     }
 
     public void showVideo(String videoId) {
-        final WebEngine webengine = webView.getEngine();
+        Platform.runLater(() -> {
+            final WebEngine webengine = webView.getEngine();
 
-        webengine.getLoadWorker().stateProperty().addListener(
-                (ov, oldState, newState) -> {
-                    if (webengine.getDocument() != null) {
-                        webengine.executeScript("document.querySelector('VIDEO').pause()");
-                    }
-
-                    if (newState == Worker.State.SUCCEEDED) {
-                        Document doc = webengine.getDocument();
-
-                        ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
-
-                        try {
-                            Transformer transformer = TransformerFactory.newInstance().newTransformer();
-                            transformer.setOutputProperty(OutputKeys.OMIT_XML_DECLARATION, "no");
-                            transformer.setOutputProperty(OutputKeys.METHOD, "xml");
-                            transformer.setOutputProperty(OutputKeys.INDENT, "yes");
-                            transformer.setOutputProperty(OutputKeys.ENCODING, "UTF-8");
-                            transformer.setOutputProperty("{http://xml.apache.org/xslt}indent-amount", "4");
-
-                            transformer.transform(new DOMSource(doc),
-                                    new StreamResult(new OutputStreamWriter(outputStream, StandardCharsets.UTF_8)));
-
-                            String result = outputStream.toString(StandardCharsets.UTF_8);
-
-                            XMLInputFactory xmlInputFactory = XMLInputFactory.newInstance();
-                            XMLEventReader reader = xmlInputFactory.createXMLEventReader(new StringReader(result));
-
-                            while (reader.hasNext()) {
-                                XMLEvent nextEvent = reader.nextEvent();
-
-                                if (nextEvent.isStartElement()) {
-                                    StartElement startElement = nextEvent.asStartElement();
-
-                                    if ("video".equalsIgnoreCase(startElement.getName().getLocalPart())) {
-                                        Attribute url = startElement.getAttributeByName(new QName("src"));
-
-                                        if (url != null) {
-                                            setMediaUrl(url.getValue());
-
-                                            break;
-                                        }
-                                    }
-                                }
-                            }
-                        } catch (Exception ex) {
-                            ex.printStackTrace();
-                        }
-                    }
-                });
-
-        webengine.load("https://www.youtube.com/watch?v=" + videoId);
+            webengine.load("https://www.youtube.com/watch?v=" + videoId);
+        });
     }
 
     private void setMediaUrl(String url) {
         Media media = new Media(url);
         MediaPlayer mediaPlayer = new MediaPlayer(media);
+
         mediaPlayer.play();
 
         MediaView mediaView = new MediaView(mediaPlayer);
+        mediaView.setFitWidth(800);
+        mediaView.setFitHeight(600);
 
         BorderPane root = new BorderPane();
         root.setCenter(mediaView);

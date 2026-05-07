@@ -17,13 +17,16 @@ public class MediaLinkPanel extends JPanel {
     private final BookService bookService;
     private MediaLinkTableModel linkTableModel;
 
+    private BrowserPanel browserPanel;
+
     private int bookId = -1;
     private int pageId = -1;
 
-    public MediaLinkPanel(BookService bookService) {
+    public MediaLinkPanel(BookService bookService, BrowserPanel browserPanel) {
         super(new BorderLayout());
 
         this.bookService = bookService;
+        this.browserPanel = browserPanel;
 
         buildUI();
     }
@@ -55,6 +58,19 @@ public class MediaLinkPanel extends JPanel {
 
                     if (selectedRow == linkTableModel.getRowCount()-1) {
                         linkTableModel.addEmptyRowAtEnd(bookId, pageId);
+                    }
+                }
+            }
+        });
+
+        JTableUtil.addKeyBinding(mediaLinkTable, "playVideo", KeyStroke.getKeyStroke("control P"), new AbstractAction() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                int selectedRow = mediaLinkTable.getSelectedRow();
+                if (selectedRow != -1) {
+                    MediaLink mediaLink = linkTableModel.getMediaLinks().get(selectedRow);
+                    if (mediaLink != null && !mediaLink.getId().isBlank()) {
+                        browserPanel.showVideo(mediaLink.getId());
                     }
                 }
             }
