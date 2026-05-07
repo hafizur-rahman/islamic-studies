@@ -15,6 +15,7 @@ import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
 import java.io.FileOutputStream;
 import java.io.OutputStreamWriter;
+import java.nio.charset.StandardCharsets;
 
 public class BrowserPanel extends JFXPanel {
     private Scene scene;
@@ -52,7 +53,7 @@ public class BrowserPanel extends JFXPanel {
                             transformer.setOutputProperty("{http://xml.apache.org/xslt}indent-amount", "4");
 
                             transformer.transform(new DOMSource(doc),
-                                    new StreamResult(new OutputStreamWriter(new FileOutputStream("data.html"), "UTF-8")));
+                                    new StreamResult(new OutputStreamWriter(new FileOutputStream("data.html"), StandardCharsets.UTF_8)));
                         } catch (Exception ex) {
                             ex.printStackTrace();
                         }
