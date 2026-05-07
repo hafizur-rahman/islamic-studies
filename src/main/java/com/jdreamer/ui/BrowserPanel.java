@@ -106,7 +106,8 @@ public class BrowserPanel extends JFXPanel {
     private void setMediaUrl(String url) {
         Media media = new Media(url);
         MediaPlayer mediaPlayer = new MediaPlayer(media);
-
+        mediaPlayer.play();
+        
         MediaView mediaView = new MediaView(mediaPlayer);
 
         BorderPane root = new BorderPane();
@@ -114,8 +115,6 @@ public class BrowserPanel extends JFXPanel {
 
         mediaPlayerScene = new Scene(root);
         setScene(mediaPlayerScene);
-
-        mediaPlayer.play();
     }
 
 }
