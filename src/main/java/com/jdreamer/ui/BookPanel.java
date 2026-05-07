@@ -25,7 +25,7 @@ import java.util.List;
 public class BookPanel extends JPanel {
     private int currentBookId = -1;
 
-    private JButton showHideButton = new JButton("Show/Hide Tree");
+    private JButton showHideButton = new JButton("Hide Library");
     private JScrollPane fileTreePane;
 
     private JTabbedPane booksTabbedPane;
@@ -63,6 +63,8 @@ public class BookPanel extends JPanel {
 
         showHideButton.addActionListener(e -> {
             fileTreePane.setVisible(!fileTreePane.isVisible());
+
+            showHideButton.setText(fileTreePane.isVisible() ? "Hide Library" : "Show Library");
 
             this.revalidate();
             this.repaint();
