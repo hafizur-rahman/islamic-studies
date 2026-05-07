@@ -29,21 +29,15 @@ import java.io.StringReader;
 import java.nio.charset.StandardCharsets;
 
 public class BrowserPanel extends JFXPanel {
-    private Scene scene;
     private WebView webView;
     private Scene mediaPlayerScene;
-
-    private static final String YOUTUBE_VIDEO_ID = "l5mauNBTvUU"; // Replace with your video ID
 
     public BrowserPanel() {
         Platform.runLater(() -> {
             webView = new WebView();
-            scene = new Scene(webView);
 
             webView.getEngine().setJavaScriptEnabled(true);
             webView.setVisible(false);
-
-            showVideo(YOUTUBE_VIDEO_ID);
         });
     }
 
@@ -107,7 +101,7 @@ public class BrowserPanel extends JFXPanel {
         Media media = new Media(url);
         MediaPlayer mediaPlayer = new MediaPlayer(media);
         mediaPlayer.play();
-        
+
         MediaView mediaView = new MediaView(mediaPlayer);
 
         BorderPane root = new BorderPane();
