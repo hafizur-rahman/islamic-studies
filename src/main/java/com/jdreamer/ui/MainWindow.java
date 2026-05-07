@@ -21,8 +21,8 @@ public class MainWindow extends JFrame {
 
         JTabbedPane tabbedPane = new JTabbedPane();
 
-        //BrowserPanel browserPanel = new BrowserPanel();
-        //tabbedPane.add(browserPanel);
+        BrowserPanel browserPanel = new BrowserPanel();
+        tabbedPane.add(browserPanel);
 
         NotesPanel notesPanel = new NotesPanel(bookService);
         tabbedPane.add(notesPanel);
