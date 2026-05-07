@@ -4,12 +4,23 @@ import com.jdreamer.service.BookService;
 import com.jdreamer.ui.MainWindow;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
+import me.friwi.jcefmaven.CefAppBuilder;
+import me.friwi.jcefmaven.CefInitializationException;
+import me.friwi.jcefmaven.MavenCefAppHandlerAdapter;
+import me.friwi.jcefmaven.UnsupportedPlatformException;
+import me.friwi.jcefmaven.impl.progress.ConsoleProgressHandler;
+import org.cef.CefApp;
+import org.cef.CefClient;
+import org.cef.browser.CefBrowser;
+import org.cef.handler.CefLifeSpanHandlerAdapter;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.Bean;
 
 import javax.swing.*;
+import java.io.File;
+import java.io.IOException;
 
 @SpringBootApplication
 public class IslamicStudiesApp {
@@ -28,11 +39,17 @@ public class IslamicStudiesApp {
     @Bean
     CommandLineRunner startUi(BookService bookService) {
         return args -> {
-            SwingUtilities.invokeLater(() -> createAndShowGui(bookService));
+            SwingUtilities.invokeLater(() -> {
+                try {
+                    createAndShowGui(bookService);
+                } catch (Exception e) {
+                    throw new RuntimeException(e);
+                }
+            });
         };
     }
 
-    private static void createAndShowGui(BookService bookService) {
+    private static void createAndShowGui(BookService bookService) throws Exception {
         try {
             for (UIManager.LookAndFeelInfo info : UIManager.getInstalledLookAndFeels()) {
                 if ("Nimbus".equals(info.getName())) {

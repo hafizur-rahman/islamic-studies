@@ -19,10 +19,17 @@ public class MainWindow extends JFrame {
     private void buildUI() {
         setLayout(new BorderLayout());
 
+        JTabbedPane tabbedPane = new JTabbedPane();
+
+        //BrowserPanel browserPanel = new BrowserPanel();
+        //tabbedPane.add(browserPanel);
+
         NotesPanel notesPanel = new NotesPanel(bookService);
+        tabbedPane.add(notesPanel);
+
         BookPanel bookPanel = new BookPanel(bookService, notesPanel);
 
-        JSplitPane splitPane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, bookPanel, notesPanel);
+        JSplitPane splitPane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, bookPanel, tabbedPane);
         splitPane.setDividerLocation(1200);
 
         add(splitPane, BorderLayout.CENTER);
@@ -32,6 +39,5 @@ public class MainWindow extends JFrame {
         setLocationRelativeTo(null);
         setVisible(true);
     }
-
 }
 
