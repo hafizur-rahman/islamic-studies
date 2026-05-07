@@ -31,6 +31,8 @@ import java.nio.charset.StandardCharsets;
 public class BrowserPanel extends JFXPanel {
     private WebView webView;
     private Scene mediaPlayerScene;
+    private BorderPane root;
+    private MediaPlayer mediaPlayer;
 
     public BrowserPanel() {
         Platform.runLater(() -> {
@@ -90,6 +92,11 @@ public class BrowserPanel extends JFXPanel {
                             }
                         }
                     });
+
+            root = new BorderPane();
+            mediaPlayerScene = new Scene(root);
+
+            setScene(mediaPlayerScene);
         });
     }
 
@@ -102,20 +109,27 @@ public class BrowserPanel extends JFXPanel {
     }
 
     private void setMediaUrl(String url) {
-        Media media = new Media(url);
-        MediaPlayer mediaPlayer = new MediaPlayer(media);
+        Platform.runLater(() -> {
+            final WebEngine webengine = webView.getEngine();
 
-        mediaPlayer.play();
+            if (webengine.getDocument() != null) {
+                webengine.executeScript("document.querySelector('VIDEO').pause()");
+            }
 
-        MediaView mediaView = new MediaView(mediaPlayer);
-        mediaView.setFitWidth(800);
-        mediaView.setFitHeight(600);
+            if (mediaPlayer != null) {
+                mediaPlayer.stop();
+                mediaPlayer.dispose();
+            }
 
-        BorderPane root = new BorderPane();
-        root.setCenter(mediaView);
+            mediaPlayer = new MediaPlayer(new Media(url));
+            mediaPlayer.play();
 
-        mediaPlayerScene = new Scene(root);
-        setScene(mediaPlayerScene);
+            MediaView mediaView = new MediaView(mediaPlayer);
+            mediaView.setFitWidth(900);
+            mediaView.setFitHeight(750);
+
+            root.setCenter(mediaView);
+            setScene(mediaPlayerScene);
+        });
     }
-
 }

@@ -36,7 +36,7 @@ public class MainWindow extends JFrame {
         BookPanel bookPanel = new BookPanel(bookService, listeners);
 
         JSplitPane splitPane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, bookPanel, tabbedPane);
-        splitPane.setDividerLocation(1200);
+        splitPane.setDividerLocation(1000);
 
         add(splitPane, BorderLayout.CENTER);
 
