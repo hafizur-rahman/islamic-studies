@@ -24,8 +24,10 @@ public class MediaPanel extends JPanel implements BookOrPageChangeListener  {
         browserPanel = new BrowserPanel();
         mediaLinkPanel = new MediaLinkPanel(bookService, browserPanel);
 
-        add(browserPanel, BorderLayout.CENTER);
-        add(mediaLinkPanel, BorderLayout.SOUTH);
+        JSplitPane splitPane = new JSplitPane(JSplitPane.VERTICAL_SPLIT, browserPanel, mediaLinkPanel);
+        splitPane.setDividerLocation(650);
+
+        add(splitPane, BorderLayout.CENTER);
     }
 
     @Override
