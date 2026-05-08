@@ -1,17 +1,26 @@
 package com.jdreamer.ui;
 
 import javafx.application.Platform;
+import javafx.beans.InvalidationListener;
+import javafx.beans.Observable;
 import javafx.concurrent.Worker;
 import javafx.embed.swing.JFXPanel;
+import javafx.geometry.Pos;
 import javafx.scene.Scene;
+import javafx.scene.control.Button;
+import javafx.scene.control.Label;
+import javafx.scene.control.Slider;
 import javafx.scene.layout.BorderPane;
+import javafx.scene.layout.HBox;
 import javafx.scene.media.Media;
 import javafx.scene.media.MediaPlayer;
 import javafx.scene.media.MediaView;
 import javafx.scene.web.WebEngine;
 import javafx.scene.web.WebView;
+import javafx.util.Duration;
 import org.w3c.dom.Document;
 
+import javax.swing.*;
 import javax.xml.namespace.QName;
 import javax.xml.stream.XMLEventReader;
 import javax.xml.stream.XMLInputFactory;
@@ -32,20 +41,33 @@ public class BrowserPanel extends JFXPanel {
     private WebView webView;
     private Scene mediaPlayerScene;
     private BorderPane root;
+    private MediaView mediaView;
     private MediaPlayer mediaPlayer;
+
+    private Duration duration;
+    private Button playButton;
+    private Slider timeSlider;
+    private Label playTime;
+
+    private HBox panel;
+
+    private boolean stopRequested = false;
+    private boolean atEndOfMedia = false;
 
     public BrowserPanel() {
         Platform.runLater(() -> {
+            mediaView = new MediaView();
             webView = new WebView();
 
             final WebEngine webengine = webView.getEngine();
 
-            webengine.setJavaScriptEnabled(true);
+            webengine.setJavaScriptEnabled(false);
             webView.setVisible(false);
 
             webengine.getLoadWorker().stateProperty().addListener(
                     (ov, oldState, newState) -> {
                         if (webengine.getDocument() != null) {
+                            webengine.setJavaScriptEnabled(true);
                             webengine.executeScript("document.querySelector('VIDEO').pause()");
                         }
 
@@ -93,6 +115,47 @@ public class BrowserPanel extends JFXPanel {
                         }
                     });
 
+
+            panel = new HBox();
+            panel.setAlignment(Pos.CENTER);
+
+            playButton = new Button(">");
+
+            timeSlider = new Slider();
+            timeSlider.setMinWidth(50);
+
+            playTime = new Label("0:00/0:00");
+            playTime.setPrefWidth(130);
+            playTime.setMinWidth(50);
+
+            playButton.setOnAction(e -> {
+                if (mediaPlayer == null) {
+                    return;
+                }
+
+                MediaPlayer.Status status = mediaPlayer.getStatus();
+                if (status == MediaPlayer.Status.UNKNOWN || status == MediaPlayer.Status.HALTED) {
+                    // don't do anything in these states
+                    return;
+                }
+
+                if (status == MediaPlayer.Status.PAUSED
+                        || status == MediaPlayer.Status.READY
+                        || status == MediaPlayer.Status.STOPPED) {
+                    // rewind the movie if we're sitting at the end
+                    if (atEndOfMedia) {
+                        mediaPlayer.seek(mediaPlayer.getStartTime());
+                        atEndOfMedia = false;
+                    }
+                    mediaPlayer.play();
+                } else {
+                    mediaPlayer.pause();
+                }
+            });
+
+            panel.getChildren().addAll(playButton, timeSlider, playTime);
+            panel.autosize();
+            
             root = new BorderPane();
             mediaPlayerScene = new Scene(root);
 
@@ -108,6 +171,65 @@ public class BrowserPanel extends JFXPanel {
         });
     }
 
+    private MediaPlayer prepareMediaPlayer(String url) {
+        MediaPlayer mediaPlayer = new MediaPlayer(new Media(url));
+        mediaView.setMediaPlayer(mediaPlayer);
+        mediaPlayer.play();
+
+        mediaPlayer.currentTimeProperty().addListener(ov -> updateValues());
+
+        mediaPlayer.setOnReady(() -> {
+            duration = mediaPlayer.getMedia().getDuration();
+            updateValues();
+        });
+
+        mediaPlayer.setOnPlaying(() -> {
+            if (stopRequested) {
+                mediaPlayer.pause();
+                stopRequested = false;
+            } else {
+                playButton.setText("||");
+            }
+        });
+
+        mediaPlayer.setOnPaused(() -> {
+            //System.out.println("onPaused");
+            playButton.setText(">");
+        });
+
+        mediaPlayer.setOnReady(() -> {
+            duration = mediaPlayer.getMedia().getDuration();
+            updateValues();
+        });
+
+        mediaPlayer.setOnEndOfMedia(() -> {
+            playButton.setText(">");
+            stopRequested = true;
+        });
+
+
+        return mediaPlayer;
+    }
+
+    protected void updateValues() {
+        if (mediaPlayer != null && playTime != null && timeSlider != null) {
+            Platform.runLater(new Runnable() {
+                public void run() {
+                    Duration currentTime = mediaPlayer.getCurrentTime();
+                    playTime.setText(formatTime(currentTime, duration));
+
+                    timeSlider.setDisable(duration.isUnknown());
+                    if (!timeSlider.isDisabled()
+                            && duration.greaterThan(Duration.ZERO)
+                            && !timeSlider.isValueChanging()) {
+                        timeSlider.setValue(currentTime.divide(duration).toMillis()
+                                * 100.0);
+                    }
+                }
+            });
+        }
+    }
+
     private void setMediaUrl(String url) {
         Platform.runLater(() -> {
             final WebEngine webengine = webView.getEngine();
@@ -121,15 +243,54 @@ public class BrowserPanel extends JFXPanel {
                 mediaPlayer.dispose();
             }
 
-            mediaPlayer = new MediaPlayer(new Media(url));
-            mediaPlayer.play();
+            mediaPlayer = prepareMediaPlayer(url);
 
-            MediaView mediaView = new MediaView(mediaPlayer);
             mediaView.setFitWidth(900);
             mediaView.setFitHeight(750);
 
             root.setCenter(mediaView);
+            root.setBottom(panel);
+
             setScene(mediaPlayerScene);
         });
+    }
+
+    private static String formatTime(Duration elapsed, Duration duration) {
+        int intElapsed = (int) Math.floor(elapsed.toSeconds());
+        int elapsedHours = intElapsed / (60 * 60);
+        if (elapsedHours > 0) {
+            intElapsed -= elapsedHours * 60 * 60;
+        }
+        int elapsedMinutes = intElapsed / 60;
+        int elapsedSeconds = intElapsed - elapsedHours * 60 * 60
+                - elapsedMinutes * 60;
+
+        if (duration.greaterThan(Duration.ZERO)) {
+            int intDuration = (int) Math.floor(duration.toSeconds());
+            int durationHours = intDuration / (60 * 60);
+            if (durationHours > 0) {
+                intDuration -= durationHours * 60 * 60;
+            }
+            int durationMinutes = intDuration / 60;
+            int durationSeconds = intDuration - durationHours * 60 * 60
+                    - durationMinutes * 60;
+            if (durationHours > 0) {
+                return String.format("%d:%02d:%02d/%d:%02d:%02d",
+                        elapsedHours, elapsedMinutes, elapsedSeconds,
+                        durationHours, durationMinutes, durationSeconds);
+            } else {
+                return String.format("%02d:%02d/%02d:%02d",
+                        elapsedMinutes, elapsedSeconds, durationMinutes,
+                        durationSeconds);
+            }
+        } else {
+            if (elapsedHours > 0) {
+                return String.format("%d:%02d:%02d", elapsedHours,
+                        elapsedMinutes, elapsedSeconds);
+            } else {
+                return String.format("%02d:%02d", elapsedMinutes,
+                        elapsedSeconds);
+            }
+        }
     }
 }
