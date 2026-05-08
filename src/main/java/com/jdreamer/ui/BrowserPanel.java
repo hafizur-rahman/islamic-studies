@@ -39,17 +39,17 @@ import java.nio.charset.StandardCharsets;
 
 public class BrowserPanel extends JFXPanel {
     private WebView webView;
+
     private Scene mediaPlayerScene;
     private BorderPane root;
     private MediaView mediaView;
     private MediaPlayer mediaPlayer;
 
+    private Label videoLink;
     private Duration duration;
     private Button playButton;
     private Slider timeSlider;
     private Label playTime;
-
-    private HBox panel;
 
     private boolean stopRequested = false;
     private boolean atEndOfMedia = false;
@@ -67,8 +67,12 @@ public class BrowserPanel extends JFXPanel {
             webengine.getLoadWorker().stateProperty().addListener(
                     (ov, oldState, newState) -> {
                         if (webengine.getDocument() != null) {
-                            webengine.setJavaScriptEnabled(true);
-                            webengine.executeScript("document.querySelector('VIDEO').pause()");
+                            try {
+                                webengine.setJavaScriptEnabled(true);
+                                webengine.executeScript("document.querySelector('VIDEO').pause()");
+                            } catch (Exception e) {
+                                // Suppress the error
+                            }
                         }
 
                         if (newState == Worker.State.SUCCEEDED) {
@@ -116,8 +120,8 @@ public class BrowserPanel extends JFXPanel {
                     });
 
 
-            panel = new HBox();
-            panel.setAlignment(Pos.CENTER);
+            HBox bottomPanel = new HBox();
+            bottomPanel.setAlignment(Pos.CENTER);
 
             playButton = new Button(">");
 
@@ -153,16 +157,23 @@ public class BrowserPanel extends JFXPanel {
                 }
             });
 
-            panel.getChildren().addAll(playButton, timeSlider, playTime);
-            panel.autosize();
+            bottomPanel.getChildren().addAll(playButton, timeSlider, playTime);
+            bottomPanel.autosize();
 
             mediaView.setFitWidth(900);
             mediaView.setFitHeight(750);
 
+            HBox topPanel = new HBox();
+            topPanel.setAlignment(Pos.CENTER);
+
+            videoLink = new Label();
+            topPanel.getChildren().add(videoLink);
+
             root = new BorderPane();
 
+            root.setTop(topPanel);
             root.setCenter(mediaView);
-            root.setBottom(panel);
+            root.setBottom(bottomPanel);
 
             mediaPlayerScene = new Scene(root);
 
@@ -172,8 +183,9 @@ public class BrowserPanel extends JFXPanel {
 
     public void showVideo(String url) {
         Platform.runLater(() -> {
-            final WebEngine webengine = webView.getEngine();
+            videoLink.setText(url);
 
+            final WebEngine webengine = webView.getEngine();
             webengine.load(url);
         });
     }
@@ -242,7 +254,12 @@ public class BrowserPanel extends JFXPanel {
             final WebEngine webengine = webView.getEngine();
 
             if (webengine.getDocument() != null) {
-                webengine.executeScript("document.querySelector('VIDEO').pause()");
+                try {
+                    webengine.setJavaScriptEnabled(true);
+                    webengine.executeScript("document.querySelector('VIDEO').pause()");
+                } catch (Exception e) {
+                    // Suppress the error
+                }
             }
 
             if (mediaPlayer != null) {
