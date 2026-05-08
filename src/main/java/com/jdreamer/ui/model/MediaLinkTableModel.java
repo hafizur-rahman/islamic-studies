@@ -52,7 +52,7 @@ public class MediaLinkTableModel extends AbstractTableModel {
 
     @Override
     public boolean isCellEditable(int row, int col) {
-        return col != 1 && col != 2 && col != 3;
+        return col != 0 && col != 1 && col != 2;
     }
 
     @Override
