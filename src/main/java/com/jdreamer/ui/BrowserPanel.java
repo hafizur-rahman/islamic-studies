@@ -9,6 +9,7 @@ import javafx.geometry.Pos;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
+import javafx.scene.control.Separator;
 import javafx.scene.control.Slider;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
@@ -61,14 +62,13 @@ public class BrowserPanel extends JFXPanel {
 
             final WebEngine webengine = webView.getEngine();
 
-            webengine.setJavaScriptEnabled(false);
+            webengine.setJavaScriptEnabled(true);
             webView.setVisible(false);
 
             webengine.getLoadWorker().stateProperty().addListener(
                     (ov, oldState, newState) -> {
                         if (webengine.getDocument() != null) {
                             try {
-                                webengine.setJavaScriptEnabled(true);
                                 webengine.executeScript("document.querySelector('VIDEO').pause()");
                             } catch (Exception e) {
                                 // Suppress the error
@@ -126,7 +126,31 @@ public class BrowserPanel extends JFXPanel {
             playButton = new Button(">");
 
             timeSlider = new Slider();
-            timeSlider.setMinWidth(50);
+            timeSlider.setPrefWidth(500);
+
+            timeSlider.setMin(0);
+            timeSlider.setMax(100);
+            timeSlider.setValue(0);          // start at the beginning
+
+            timeSlider.valueChangingProperty().addListener((obs, wasChanging, isChanging) -> {
+                // Only act when the slider is *not* being dragged (i.e. the
+                // user released the mouse button or touched‑ended).
+                if (!isChanging && mediaPlayer != null) {
+                    duration = mediaPlayer.getTotalDuration();
+
+                    // Guard against division by zero in case duration is unknown.
+                    if (duration == null || duration.isUnknown() || !duration.greaterThan(Duration.ZERO)) {
+                        return;
+                    }
+
+                    // Convert 0‑100 slider value into a fraction 0‑1.
+                    double fraction = timeSlider.getValue() / 100.0;
+
+                    // Seek to the corresponding position in the media.
+                    Duration target = duration.multiply(fraction);
+                    mediaPlayer.seek(target);
+                }
+            });
 
             playTime = new Label("0:00/0:00");
             playTime.setPrefWidth(130);
@@ -157,7 +181,7 @@ public class BrowserPanel extends JFXPanel {
                 }
             });
 
-            bottomPanel.getChildren().addAll(playButton, timeSlider, playTime);
+            bottomPanel.getChildren().addAll(playButton, new Separator(), timeSlider, new Separator(), playTime);
             bottomPanel.autosize();
 
             mediaView.setFitWidth(900);
@@ -232,18 +256,17 @@ public class BrowserPanel extends JFXPanel {
 
     protected void updateValues() {
         if (mediaPlayer != null && playTime != null && timeSlider != null) {
-            Platform.runLater(new Runnable() {
-                public void run() {
-                    Duration currentTime = mediaPlayer.getCurrentTime();
-                    playTime.setText(formatTime(currentTime, duration));
+            Platform.runLater(() -> {
+                Duration currentTime = mediaPlayer.getCurrentTime();
+                playTime.setText(formatTime(currentTime, duration));
 
-                    timeSlider.setDisable(duration.isUnknown());
-                    if (!timeSlider.isDisabled()
-                            && duration.greaterThan(Duration.ZERO)
-                            && !timeSlider.isValueChanging()) {
-                        timeSlider.setValue(currentTime.divide(duration).toMillis()
-                                * 100.0);
-                    }
+                timeSlider.setDisable(duration.isUnknown());
+
+                if (!timeSlider.isDisabled()
+                        && duration.greaterThan(Duration.ZERO)
+                        && !timeSlider.isValueChanging()) {
+                    timeSlider.setValue(currentTime.divide(duration).toMillis()
+                            * 100.0);
                 }
             });
         }
