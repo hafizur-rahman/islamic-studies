@@ -9,7 +9,7 @@ import java.util.List;
 
 public class MediaLinkTableModel extends AbstractTableModel {
 
-    private final String[] columns = {"Select the cell and press <CTRL + P>", "BookID", "PageID"};
+    private final String[] columns = {"ID", "BookID", "PageID", "URL", "Channel Name"};
     // Use a private final list to ensure we control the data source
     @Getter
     private final List<MediaLink> mediaLinks;
@@ -43,13 +43,16 @@ public class MediaLinkTableModel extends AbstractTableModel {
             case 0 -> n.getId();
             case 1 -> n.getBookId();
             case 2 -> n.getPageId();
+            case 3 -> n.getUrl();
+            case 4 -> n.getChannelName();
+
             default -> null;
         };
     }
 
     @Override
     public boolean isCellEditable(int row, int col) {
-        return true;
+        return col != 1 && col != 2 && col != 3;
     }
 
     @Override
@@ -59,14 +62,28 @@ public class MediaLinkTableModel extends AbstractTableModel {
 
         try {
             switch (col) {
-                case 0 -> n.setId(value != null ? value.toString() : "");
+                case 0 -> n.setId(tryParseLong(value));
                 case 1 -> n.setBookId(tryParseInt(value));
                 case 2 -> n.setPageId(tryParseInt(value));
+                case 3 -> n.setUrl(value != null ? value.toString() : "");
+                case 4 -> n.setChannelName(value != null ? value.toString() : "");
             }
             fireTableCellUpdated(row, col);
         } catch (Exception e) {
             System.err.println("Error updating cell: " + e.getMessage());
         }
+    }
+
+    private long tryParseLong(Object value) {
+        if (value instanceof Long i) return i;
+        if (value instanceof String s) {
+            try {
+                return Long.parseLong(s);
+            } catch (NumberFormatException e) {
+                return 0; // Default value on error
+            }
+        }
+        return 0;
     }
 
     /**
@@ -102,7 +119,7 @@ public class MediaLinkTableModel extends AbstractTableModel {
      * Creates a blank Noun object to act as a template for the user.
      */
     public void addEmptyRowAtEnd(int bookId, int pageId) {
-        if (mediaLinks.isEmpty() || mediaLinks.get(mediaLinks.size()-1).getId() != null) {
+        if (mediaLinks.isEmpty() || mediaLinks.get(mediaLinks.size()-1).getUrl() != null) {
             int newIndex = mediaLinks.size();
 
             MediaLink newVideo = new MediaLink(); // Assumes a default constructor exists

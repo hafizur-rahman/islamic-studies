@@ -100,11 +100,11 @@ public class BrowserPanel extends JFXPanel {
         });
     }
 
-    public void showVideo(String videoId) {
+    public void showVideo(String url) {
         Platform.runLater(() -> {
             final WebEngine webengine = webView.getEngine();
 
-            webengine.load("https://www.youtube.com/watch?v=" + videoId);
+            webengine.load(url);
         });
     }
 

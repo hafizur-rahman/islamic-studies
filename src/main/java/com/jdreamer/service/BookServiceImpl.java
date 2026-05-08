@@ -61,10 +61,10 @@ public class BookServiceImpl implements BookService {
 
     @Override
     public void save(MediaLink mediaLink) {
-        Optional<MediaLink> m = mediaLinkRepository.findById(mediaLink.getId());
+        Optional<MediaLink> m = mediaLinkRepository.findByUrl(mediaLink.getUrl());
 
         if (m.isPresent()) {
-            mediaLink.setId(m.get().getId());
+            mediaLink.setUrl(m.get().getUrl());
         }
 
         mediaLinkRepository.save(mediaLink);

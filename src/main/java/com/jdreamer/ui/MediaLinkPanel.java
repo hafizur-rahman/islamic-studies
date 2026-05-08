@@ -35,13 +35,13 @@ public class MediaLinkPanel extends JPanel {
         linkTableModel = new MediaLinkTableModel(Collections.emptyList());
 
         JTable mediaLinkTable = new JTable(linkTableModel);
-        for (int columnId: new int[]{1, 2}) {
+        for (int columnId: new int[]{0, 1, 2}) {
             mediaLinkTable.getColumnModel().getColumn(columnId).setMinWidth(0);
             mediaLinkTable.getColumnModel().getColumn(columnId).setMaxWidth(0);
         }
 
         mediaLinkTable.setRowHeight(36);
-        mediaLinkTable.getTableHeader().setFont(new Font("Arial", Font.BOLD, 18));
+        mediaLinkTable.getTableHeader().setFont(new Font("Arial", Font.BOLD, 14));
 
         add(new JScrollPane(mediaLinkTable), BorderLayout.CENTER);
 
@@ -52,7 +52,7 @@ public class MediaLinkPanel extends JPanel {
                 int selectedRow = mediaLinkTable.getSelectedRow();
                 if (selectedRow != -1) {
                     MediaLink mediaLink = linkTableModel.getMediaLinks().get(selectedRow);
-                    if (mediaLink != null && !mediaLink.getId().isBlank()) {
+                    if (mediaLink != null && !mediaLink.getUrl().isBlank()) {
                         bookService.save(mediaLink);
                     }
 
@@ -69,8 +69,8 @@ public class MediaLinkPanel extends JPanel {
                 int selectedRow = mediaLinkTable.getSelectedRow();
                 if (selectedRow != -1) {
                     MediaLink mediaLink = linkTableModel.getMediaLinks().get(selectedRow);
-                    if (mediaLink != null && !mediaLink.getId().isBlank()) {
-                        browserPanel.showVideo(mediaLink.getId());
+                    if (mediaLink != null && !mediaLink.getUrl().isBlank()) {
+                        browserPanel.showVideo(mediaLink.getUrl());
                     }
                 }
             }
@@ -89,7 +89,7 @@ public class MediaLinkPanel extends JPanel {
 
     public void saveData() {
         List<MediaLink> mediaLinks = linkTableModel.getMediaLinks().stream()
-                .filter(noun -> !StringUtils.isBlank(noun.getId()))
+                .filter(mediaLink -> !StringUtils.isBlank(mediaLink.getUrl()))
                 .collect(Collectors.toList());
 
         bookService.saveMediaLinks(mediaLinks);
