@@ -155,8 +155,15 @@ public class BrowserPanel extends JFXPanel {
 
             panel.getChildren().addAll(playButton, timeSlider, playTime);
             panel.autosize();
-            
+
+            mediaView.setFitWidth(900);
+            mediaView.setFitHeight(750);
+
             root = new BorderPane();
+
+            root.setCenter(mediaView);
+            root.setBottom(panel);
+
             mediaPlayerScene = new Scene(root);
 
             setScene(mediaPlayerScene);
@@ -244,12 +251,6 @@ public class BrowserPanel extends JFXPanel {
             }
 
             mediaPlayer = prepareMediaPlayer(url);
-
-            mediaView.setFitWidth(900);
-            mediaView.setFitHeight(750);
-
-            root.setCenter(mediaView);
-            root.setBottom(panel);
 
             setScene(mediaPlayerScene);
         });
