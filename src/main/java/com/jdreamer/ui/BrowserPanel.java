@@ -1,8 +1,7 @@
 package com.jdreamer.ui;
 
+import com.jdreamer.cache.MediaUrlCache;
 import javafx.application.Platform;
-import javafx.beans.InvalidationListener;
-import javafx.beans.Observable;
 import javafx.concurrent.Worker;
 import javafx.embed.swing.JFXPanel;
 import javafx.geometry.Pos;
@@ -21,7 +20,6 @@ import javafx.scene.web.WebView;
 import javafx.util.Duration;
 import org.w3c.dom.Document;
 
-import javax.swing.*;
 import javax.xml.namespace.QName;
 import javax.xml.stream.XMLEventReader;
 import javax.xml.stream.XMLInputFactory;
@@ -67,13 +65,7 @@ public class BrowserPanel extends JFXPanel {
 
             webengine.getLoadWorker().stateProperty().addListener(
                     (ov, oldState, newState) -> {
-                        if (webengine.getDocument() != null) {
-                            try {
-                                webengine.executeScript("document.querySelector('VIDEO').pause()");
-                            } catch (Exception e) {
-                                // Suppress the error
-                            }
-                        }
+                        pauseVideo(webengine);
 
                         if (newState == Worker.State.SUCCEEDED) {
                             Document doc = webengine.getDocument();
@@ -84,9 +76,7 @@ public class BrowserPanel extends JFXPanel {
                                 Transformer transformer = TransformerFactory.newInstance().newTransformer();
                                 transformer.setOutputProperty(OutputKeys.OMIT_XML_DECLARATION, "no");
                                 transformer.setOutputProperty(OutputKeys.METHOD, "xml");
-                                transformer.setOutputProperty(OutputKeys.INDENT, "yes");
                                 transformer.setOutputProperty(OutputKeys.ENCODING, "UTF-8");
-                                transformer.setOutputProperty("{http://xml.apache.org/xslt}indent-amount", "4");
 
                                 transformer.transform(new DOMSource(doc),
                                         new StreamResult(new OutputStreamWriter(outputStream, StandardCharsets.UTF_8)));
@@ -106,7 +96,13 @@ public class BrowserPanel extends JFXPanel {
                                             Attribute url = startElement.getAttributeByName(new QName("src"));
 
                                             if (url != null) {
+                                                String pageUrl = webengine.getLocation();
+
+                                                MediaUrlCache.get().put(pageUrl, url.getValue());   // url == <video src>
+
                                                 setMediaUrl(url.getValue());
+
+                                                Thread.sleep(10);
 
                                                 break;
                                             }
@@ -205,12 +201,43 @@ public class BrowserPanel extends JFXPanel {
         });
     }
 
+    private static void pauseVideo(WebEngine webengine) {
+        String pageUrl = webengine.getLocation();
+
+        if (pageUrl != null && pageUrl.startsWith("https://www.youtube.com/") && webengine.getDocument() != null) {
+            try {
+                webengine.executeScript("document.querySelector('VIDEO').pause()");
+            } catch (Exception e) {
+                // Suppress the error
+            }
+        }
+    }
+
     public void showVideo(String url) {
         Platform.runLater(() -> {
             videoLink.setText(url);
 
-            final WebEngine webengine = webView.getEngine();
-            webengine.load(url);
+            // 1. Look for a cached media URL for this page
+            String cachedMediaUrl = MediaUrlCache.get().get(url);
+
+            if (cachedMediaUrl != null) {
+                // 2a. Cache hit – play the cached video directly
+                setMediaUrl(cachedMediaUrl);
+            } else {
+                // 2b. Cache miss – load the page normally
+                final WebEngine webengine = webView.getEngine();
+                webengine.load(url);
+
+                try {
+                    Thread.sleep(100);
+
+                    if (mediaPlayer != null && mediaPlayer.getStatus() != MediaPlayer.Status.PLAYING) {
+                        mediaPlayer.play();
+                    }
+                } catch (InterruptedException e) {
+                    throw new RuntimeException(e);
+                }
+            }
         });
     }
 
@@ -250,7 +277,6 @@ public class BrowserPanel extends JFXPanel {
             stopRequested = true;
         });
 
-
         return mediaPlayer;
     }
 
@@ -274,16 +300,7 @@ public class BrowserPanel extends JFXPanel {
 
     private void setMediaUrl(String url) {
         Platform.runLater(() -> {
-            final WebEngine webengine = webView.getEngine();
-
-            if (webengine.getDocument() != null) {
-                try {
-                    webengine.setJavaScriptEnabled(true);
-                    webengine.executeScript("document.querySelector('VIDEO').pause()");
-                } catch (Exception e) {
-                    // Suppress the error
-                }
-            }
+            pauseVideo(webView.getEngine());
 
             if (mediaPlayer != null) {
                 mediaPlayer.stop();

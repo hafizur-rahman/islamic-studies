@@ -1,26 +1,18 @@
 package com.jdreamer;
 
+import com.jdreamer.cache.MediaUrlCache;
 import com.jdreamer.service.BookService;
 import com.jdreamer.ui.MainWindow;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
-import me.friwi.jcefmaven.CefAppBuilder;
-import me.friwi.jcefmaven.CefInitializationException;
-import me.friwi.jcefmaven.MavenCefAppHandlerAdapter;
-import me.friwi.jcefmaven.UnsupportedPlatformException;
-import me.friwi.jcefmaven.impl.progress.ConsoleProgressHandler;
-import org.cef.CefApp;
-import org.cef.CefClient;
-import org.cef.browser.CefBrowser;
-import org.cef.handler.CefLifeSpanHandlerAdapter;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.Bean;
 
 import javax.swing.*;
-import java.io.File;
-import java.io.IOException;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
 
 @SpringBootApplication
 public class IslamicStudiesApp {
@@ -61,9 +53,15 @@ public class IslamicStudiesApp {
         }
 
         JFrame frame = new MainWindow(bookService);
-        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
         frame.setLocationRelativeTo(null); // center on screen
         frame.setVisible(true);
+
+        frame.addWindowStateListener(new WindowAdapter() {
+            @Override
+            public void windowClosing(WindowEvent e) {
+                MediaUrlCache.get().shutdown();
+            }
+        });
     }
 }
