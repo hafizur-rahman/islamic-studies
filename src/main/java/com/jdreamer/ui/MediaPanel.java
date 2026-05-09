@@ -10,7 +10,6 @@ public class MediaPanel extends JPanel implements BookOrPageChangeListener  {
     private final BookService bookService;
 
     private MediaLinkPanel mediaLinkPanel;
-    private BrowserPanel browserPanel;
 
     public MediaPanel(BookService bookService) {
         super(new BorderLayout());
@@ -21,10 +20,11 @@ public class MediaPanel extends JPanel implements BookOrPageChangeListener  {
     }
 
     private void buildUI() {
-        browserPanel = new BrowserPanel();
-        mediaLinkPanel = new MediaLinkPanel(bookService, browserPanel);
+        VideoPlayer videoPlayer = new VideoPlayer();
 
-        JSplitPane splitPane = new JSplitPane(JSplitPane.VERTICAL_SPLIT, browserPanel, mediaLinkPanel);
+        mediaLinkPanel = new MediaLinkPanel(bookService, videoPlayer);
+
+        JSplitPane splitPane = new JSplitPane(JSplitPane.VERTICAL_SPLIT, videoPlayer, mediaLinkPanel);
         splitPane.setDividerLocation(650);
 
         add(splitPane, BorderLayout.CENTER);

@@ -17,16 +17,16 @@ public class MediaLinkPanel extends JPanel {
     private final BookService bookService;
     private MediaLinkTableModel linkTableModel;
 
-    private BrowserPanel browserPanel;
+    private VideoPlayer videoPlayer;
 
     private int bookId = -1;
     private int pageId = -1;
 
-    public MediaLinkPanel(BookService bookService, BrowserPanel browserPanel) {
+    public MediaLinkPanel(BookService bookService, VideoPlayer browserPanel) {
         super(new BorderLayout());
 
         this.bookService = bookService;
-        this.browserPanel = browserPanel;
+        this.videoPlayer = browserPanel;
 
         buildUI();
     }
@@ -70,7 +70,7 @@ public class MediaLinkPanel extends JPanel {
                 if (selectedRow != -1) {
                     MediaLink mediaLink = linkTableModel.getMediaLinks().get(selectedRow);
                     if (mediaLink != null && !mediaLink.getUrl().isBlank()) {
-                        browserPanel.showVideo(mediaLink.getUrl());
+                        videoPlayer.showVideo(mediaLink.getUrl());
                     }
                 }
             }

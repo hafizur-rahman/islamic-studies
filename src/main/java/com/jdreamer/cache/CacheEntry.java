@@ -14,7 +14,7 @@ public class CacheEntry {
 
     @JsonIgnore
     public boolean isExpired() {
-        // 24h expiration
-        return inserted.plusSeconds(24 * 60 * 60).isBefore(Instant.now());
+        // 6h expiration
+        return inserted.plusSeconds(6 * 60 * 60).isBefore(Instant.now());
     }
 }
