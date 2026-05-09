@@ -96,7 +96,7 @@ public class VideoPlayer extends JPanel {
                 }
             }
         });
-        
+
         controlPanel.add(progressSlider);
 
         playTime = new JLabel("0:00/0:00");
@@ -259,6 +259,10 @@ public class VideoPlayer extends JPanel {
     private MediaPlayer prepareMediaPlayer(String url) {
         MediaPlayer mediaPlayer = new MediaPlayer(new Media(url));
         mediaView.setMediaPlayer(mediaPlayer);
+
+        mediaPlayer.setOnPlaying(()-> playPauseBtn.setText("||"));
+        mediaPlayer.setOnPaused(()-> playPauseBtn.setText(">"));
+        mediaPlayer.setOnStopped(()-> playPauseBtn.setText(">"));
 
         // Bind slider to video duration and current time
         mediaPlayer.totalDurationProperty().addListener((obs, oldVal, newVal) -> {
