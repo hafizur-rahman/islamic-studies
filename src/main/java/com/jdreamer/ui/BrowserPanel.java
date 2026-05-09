@@ -291,6 +291,7 @@ public class BrowserPanel extends JFXPanel {
             }
 
             mediaPlayer = prepareMediaPlayer(url);
+            mediaPlayer.play();
 
             setScene(mediaPlayerScene);
         });
