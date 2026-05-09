@@ -28,7 +28,7 @@ public class MediaUrlCache {
     private final ConcurrentHashMap<String, CacheEntry> store = new ConcurrentHashMap<>();
 
     private final Path cacheFile = Paths.get(System.getProperty("user.home"),
-            ".jdreamer",
+            ".islamic-studies",
             "mediaUrlCache.json");
 
     private final ScheduledExecutorService cleaner = Executors.newSingleThreadScheduledExecutor();
