@@ -16,6 +16,8 @@ import java.awt.dnd.DnDConstants;
 import java.awt.dnd.DropTarget;
 import java.awt.dnd.DropTargetAdapter;
 import java.awt.dnd.DropTargetDropEvent;
+import java.awt.event.AdjustmentEvent;
+import java.awt.event.AdjustmentListener;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
@@ -389,6 +391,7 @@ public class BookPanel extends JPanel {
                 pdfLabels.put(bookId, pdfLabel);
 
                 JScrollPane pdfScroll = new JScrollPane(pdfLabel);
+                pdfScroll.getVerticalScrollBar().setUnitIncrement(30);
 
                 JPanel bookPanel = new JPanel(new BorderLayout());
 
