@@ -2,6 +2,7 @@ package com.jdreamer.ui;
 
 import com.jdreamer.model.UserSession;
 import com.jdreamer.service.BookService;
+import com.jdreamer.ui.model.BookOrPageChangeListener;
 import org.apache.pdfbox.Loader;
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.rendering.PDFRenderer;
@@ -9,6 +10,7 @@ import org.apache.pdfbox.rendering.PDFRenderer;
 import javax.swing.*;
 import java.awt.*;
 import java.io.File;
+import java.util.List;
 
 /**
  * A panel that shows one PDF document.
@@ -40,7 +42,9 @@ public class PdfViewerPanel extends JPanel {
 
     private int sideId;
 
-    public PdfViewerPanel(int bookId, File pdfFile, BookService bookService) throws Exception {
+    private final List<BookOrPageChangeListener> listeners;
+
+    public PdfViewerPanel(int bookId, File pdfFile, BookService bookService, List<BookOrPageChangeListener> listeners) throws Exception {
         this.bookId = bookId;
         this.doc = Loader.loadPDF(pdfFile);
         this.renderer = new PDFRenderer(doc);
@@ -53,6 +57,8 @@ public class PdfViewerPanel extends JPanel {
 
         this.currentPage = session.getPageId();
         this.zoomFactor = session.getZoomFactor();
+
+        this.listeners = listeners;
 
         buildUI();
 
@@ -156,6 +162,10 @@ public class PdfViewerPanel extends JPanel {
 
             btnPrev.setEnabled(currentPage > 0);
             btnNext.setEnabled(currentPage < doc.getNumberOfPages() - 1);
+
+            for (BookOrPageChangeListener listener: listeners) {
+                listener.onBookOrPageChange(bookId, currentPage);
+            }
         } catch (Exception e) {
             imageLabel.setIcon(null);
             totalPageInfo.setText("Error rendering page");

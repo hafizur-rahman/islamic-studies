@@ -10,6 +10,11 @@ import org.apache.pdfbox.Loader;
 import javax.swing.*;
 import javax.swing.tree.TreePath;
 import java.awt.*;
+import java.awt.datatransfer.DataFlavor;
+import java.awt.dnd.DnDConstants;
+import java.awt.dnd.DropTarget;
+import java.awt.dnd.DropTargetAdapter;
+import java.awt.dnd.DropTargetDropEvent;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.io.File;
@@ -28,12 +33,15 @@ public class MainWindow extends JFrame {
     private PdfTabbedPane leftPane = new PdfTabbedPane(0);
     private PdfTabbedPane rightPane = new PdfTabbedPane(1);
 
+    private ArrayList<BookOrPageChangeListener> listeners = new ArrayList<>();
+
     public MainWindow(BookService bookService) {
         super("Islamic Studies");
 
         this.bookService = bookService;
 
         buildUI();
+        setupDragAndDrop();
 
         loadBooksAtStartup();
     }
@@ -68,7 +76,7 @@ public class MainWindow extends JFrame {
         NotesPanel notesPanel = new NotesPanel(bookService);
         rightPane.add("Notes", notesPanel);
 
-        ArrayList<BookOrPageChangeListener> listeners = new ArrayList<>();
+
         listeners.add(mediaPanel);
         listeners.add(notesPanel);
 
@@ -131,6 +139,22 @@ public class MainWindow extends JFrame {
         }
     }
 
+    private void setupDragAndDrop() {
+        new DropTarget(this, new DropTargetAdapter() {
+            public void drop(DropTargetDropEvent dtde) {
+                try {
+                    dtde.acceptDrop(DnDConstants.ACTION_COPY);
+                    java.util.List<File> files = (List<File>) dtde.getTransferable().getTransferData(DataFlavor.javaFileListFlavor);
+                    for (File f : files) {
+                        if (f.getName().endsWith(".pdf")) openPDF(f);
+                    }
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }
+        });
+    }
+
     private void openPDF(File file) {
         try {
             // Get or create book record
@@ -139,7 +163,7 @@ public class MainWindow extends JFrame {
 
             int currentBookId = getOrCreateBookId(filePath, fileName);
 
-            PdfViewerPanel viewerPanel = new PdfViewerPanel(currentBookId, file, bookService);
+            PdfViewerPanel viewerPanel = new PdfViewerPanel(currentBookId, file, bookService, listeners);
 
             if (viewerPanel.getSideId() == 0) {
                 leftPane.addPdfFile(file.getName(), viewerPanel);
