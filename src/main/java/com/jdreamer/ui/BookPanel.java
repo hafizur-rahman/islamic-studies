@@ -148,7 +148,6 @@ public class BookPanel extends JPanel {
         pageIdField.setColumns(3);
         pageCountField.setEditable(false);
 
-
         JButton nextPageBtn = new JButton("Next");
         JButton zoomInBtn = new JButton("Zoom In");
         JButton zoomOutBtn = new JButton("Zoom Out");
@@ -219,7 +218,7 @@ public class BookPanel extends JPanel {
             loadedPdfs.put(currentBookId, currentDocument);
 
             // Get or create tab for this book
-            createOrUpdateBookTab(currentBookId, fileName);
+            createOrUpdateBookTab(currentBookId, file);
 
             // Initialize book-specific data
             UserSession session = getOrCreateUserSession(currentBookId);
@@ -228,7 +227,7 @@ public class BookPanel extends JPanel {
             bookService.saveSession(session);
 
             switchToBook(currentBookId);
-        } catch (IOException e) {
+        } catch (Exception e) {
             e.printStackTrace();
 
             JOptionPane.showMessageDialog(this, "Failed to open PDF: " + e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
@@ -375,7 +374,7 @@ public class BookPanel extends JPanel {
         }
     }
 
-    private void createOrUpdateBookTab(int bookId, String fileName) {
+    private void createOrUpdateBookTab(int bookId, File file) throws Exception {
         Book bookById = bookService.findBookById(bookId);
 
         if (bookById != null) {
@@ -395,9 +394,10 @@ public class BookPanel extends JPanel {
 
                 JPanel bookPanel = new JPanel(new BorderLayout());
 
-                bookPanel.add(pdfScroll, BorderLayout.CENTER);
+                PdfViewerPanel viewerPanel = new PdfViewerPanel(bookId, file, bookService);
+                //bookPanel.add(viewerPanel, BorderLayout.CENTER);
 
-                booksTabbedPane.addTab(tabTitle, bookPanel);
+                booksTabbedPane.addTab(tabTitle, viewerPanel);
             }
        }
 

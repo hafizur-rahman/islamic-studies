@@ -1,12 +1,9 @@
 package com.jdreamer.model;
 
-import lombok.Data;
-
 import jakarta.persistence.*;
 
 @Entity
 @Table
-@Data
 public class Page {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

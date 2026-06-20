@@ -1,7 +1,6 @@
 package com.jdreamer.ui.model;
 
 import com.jdreamer.model.Verb;
-import lombok.Getter;
 
 import javax.swing.table.AbstractTableModel;
 import java.util.ArrayList;
@@ -11,7 +10,6 @@ public class VerbTableModel extends AbstractTableModel {
 
     private final String[] columns = {"ID", "باب", "معنى", "مصدر", "أمر", "مضارع", "ماضي", "كلمة", "BookID", "PageID"};
 
-    @Getter
     private final List<Verb> verbs;          // Word is a POJO
 
     public VerbTableModel(List<Verb> verbs) {
@@ -134,4 +132,7 @@ public class VerbTableModel extends AbstractTableModel {
         }
     }
 
+    public List<Verb> getVerbs() {
+        return verbs;
+    }
 }

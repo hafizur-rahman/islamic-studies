@@ -1,7 +1,6 @@
 package com.jdreamer.ui.model;
 
 import com.jdreamer.model.MediaLink;
-import lombok.Getter;
 
 import javax.swing.table.AbstractTableModel;
 import java.util.ArrayList;
@@ -10,8 +9,8 @@ import java.util.List;
 public class MediaLinkTableModel extends AbstractTableModel {
 
     private final String[] columns = {"ID", "BookID", "PageID", "URL", "Channel Name"};
+
     // Use a private final list to ensure we control the data source
-    @Getter
     private final List<MediaLink> mediaLinks;
 
     public MediaLinkTableModel(List<MediaLink> mediaLinks) {
@@ -134,5 +133,9 @@ public class MediaLinkTableModel extends AbstractTableModel {
             // Optional: You could add logic here to automatically
             // select the new row in the JTable via the UI controller.
         }
+    }
+
+    public List<MediaLink> getMediaLinks() {
+        return mediaLinks;
     }
 }
