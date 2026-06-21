@@ -82,19 +82,19 @@ public class PdfViewerPanel extends JPanel {
         btnClose.addActionListener(e -> closeThisPanel());
 
         btnPrev.addActionListener(e -> {
-            session.setPageId(currentPage);
             goToPage(currentPage - 1);
+            session.setPageId(currentPage);
             bookService.saveSession(session);
         });
 
         btnNext.addActionListener(e -> {
-            session.setPageId(currentPage);
             goToPage(currentPage + 1);
+            session.setPageId(currentPage);
             bookService.saveSession(session);
         });
         pageIdField.addActionListener(e -> {
-            session.setPageId(currentPage);
             goToPage(Integer.parseInt(pageIdField.getText())-1);
+            session.setPageId(currentPage);
             bookService.saveSession(session);
         });
 

@@ -57,7 +57,7 @@ public class MainWindow extends JFrame {
         showHideButton.addActionListener(e -> {
             fileTreePane.setVisible(!fileTreePane.isVisible());
 
-            showHideButton.setIcon(fileTreePane.isVisible() ? HIDE_ICON : LOAD_ICON);
+            showHideButton.setIcon(fileTreePane.isVisible() ?  LOAD_ICON : HIDE_ICON);
 
             this.revalidate();
             this.repaint();
