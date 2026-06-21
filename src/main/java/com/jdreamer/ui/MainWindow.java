@@ -85,7 +85,7 @@ public class MainWindow extends JFrame {
 
         JSplitPane splitPane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, leftPane, rightPane);
         //splitPane.setResizeWeight(0.5);
-        splitPane.setDividerLocation(1000);
+        splitPane.setDividerLocation(950);
 
         add(splitPane, BorderLayout.CENTER);
 

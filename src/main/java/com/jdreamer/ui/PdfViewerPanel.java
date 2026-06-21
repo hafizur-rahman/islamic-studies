@@ -190,7 +190,7 @@ public class PdfViewerPanel extends JPanel {
      * contains it and disposes of the underlying PDF.
      */
     private void closeThisPanel() {
-        //session.setOpenAtStartup(false);
+        session.setOpenAtStartup(false);
         bookService.saveSession(session);
 
         Component parent = SwingUtilities.getAncestorOfClass(JTabbedPane.class, this);
