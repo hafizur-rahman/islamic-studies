@@ -158,19 +158,34 @@ public class MainWindow extends JFrame {
             String fileName = file.getName();
 
             int currentBookId = getOrCreateBookId(filePath, fileName);
+            UserSession userSession = getOrCreateUserSession(currentBookId);
 
-            PdfViewerPanel viewerPanel = new PdfViewerPanel(currentBookId, file, bookService, listeners);
+            PdfTabbedPane targetPane = userSession.getSide() == 0 ? leftPane : rightPane;
 
-            if (viewerPanel.getSideId() == 0) {
-                leftPane.addPdfFile(file.getName(), viewerPanel);
+            if (targetPane.isBookOpen(currentBookId)) {
+                targetPane.selectBook(currentBookId);
             } else {
-                rightPane.addPdfFile(file.getName(), viewerPanel);
+                PdfViewerPanel viewerPanel = new PdfViewerPanel(currentBookId, file, bookService, userSession, listeners);
+
+                String tabTitle = file.getName() + " (ID: " + currentBookId + ")";
+                targetPane.addPdfFile(tabTitle, viewerPanel);
             }
         } catch (Exception e) {
             e.printStackTrace();
 
             JOptionPane.showMessageDialog(this, "Failed to open PDF: " + e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
         }
+    }
+
+    private UserSession getOrCreateUserSession(int bookId) {
+        UserSession session = bookService.findUserSessionByBookId(bookId);
+        if (session == null) {
+            session = new UserSession();
+            session.setBookId(bookId);
+            session.setAccessedAt(System.currentTimeMillis());
+        }
+
+        return session;
     }
 
     private boolean isFileSelected(JTree tree) {

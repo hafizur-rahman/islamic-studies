@@ -78,4 +78,28 @@ public class PdfTabbedPane extends JTabbedPane {
             setSelectedComponent(panel);   // make it visible immediately
         }
     }
+
+    public boolean isBookOpen(int bookId) {
+        return openedFiles.contains(bookId);
+    }
+
+    public void selectBook(int bookId) {
+        for (int i = 0; i < getTabCount(); i++) {
+            String tabTitle = getTitleAt(i);
+            int idStartPos = tabTitle.lastIndexOf("ID: ");
+
+            if (idStartPos != -1) {
+                String idStr = tabTitle.substring(idStartPos + 4, tabTitle.length() - 1);
+                try {
+                    int tabBookId = Integer.parseInt(idStr);
+                    if (tabBookId == bookId) {
+                        setSelectedIndex(i);
+                        break;
+                    }
+                } catch (NumberFormatException ex) {
+                    ex.printStackTrace();
+                }
+            }
+        }
+    }
 }

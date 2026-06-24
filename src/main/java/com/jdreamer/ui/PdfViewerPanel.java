@@ -6,6 +6,7 @@ import com.jdreamer.ui.model.BookOrPageChangeListener;
 import org.apache.pdfbox.Loader;
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.rendering.PDFRenderer;
+import org.hsqldb.rights.User;
 
 import javax.swing.*;
 import java.awt.*;
@@ -44,16 +45,15 @@ public class PdfViewerPanel extends JPanel {
 
     private final List<BookOrPageChangeListener> listeners;
 
-    public PdfViewerPanel(int bookId, File pdfFile, BookService bookService, List<BookOrPageChangeListener> listeners) throws Exception {
+    public PdfViewerPanel(int bookId, File pdfFile, BookService bookService, UserSession session, List<BookOrPageChangeListener> listeners) throws Exception {
         this.bookId = bookId;
         this.doc = Loader.loadPDF(pdfFile);
         this.renderer = new PDFRenderer(doc);
 
         this.bookService = bookService;
 
-        this.session = getOrCreateUserSession();
+        this.session = session;
         this.session.setOpenAtStartup(true);
-        this.sideId = this.session.getSide();
 
         this.currentPage = session.getPageId();
         this.zoomFactor = session.getZoomFactor();
@@ -65,16 +65,7 @@ public class PdfViewerPanel extends JPanel {
         bookService.saveSession(session);
     }
 
-    private UserSession getOrCreateUserSession() {
-        UserSession session = bookService.findUserSessionByBookId(bookId);
-        if (session == null) {
-            session = new UserSession();
-            session.setBookId(bookId);
-            session.setAccessedAt(System.currentTimeMillis());
-        }
 
-        return session;
-    }
 
     private void buildUI() {
         setLayout(new BorderLayout());
@@ -214,10 +205,6 @@ public class PdfViewerPanel extends JPanel {
      */
     public PDDocument getDocument() {
         return doc;
-    }
-
-    public int getSideId() {
-        return sideId;
     }
 
     public void setSideId(int sideId) {
