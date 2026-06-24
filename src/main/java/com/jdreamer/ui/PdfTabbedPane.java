@@ -11,7 +11,7 @@ public class PdfTabbedPane extends JTabbedPane {
     private final int sideId;
     private PdfTabbedPane peer;
 
-    private final List<Integer> openedFiles = new ArrayList<>();
+    private final List<String> openedFiles = new ArrayList<>();
 
     public PdfTabbedPane(int sideId) {
         this.sideId = sideId;
@@ -61,17 +61,18 @@ public class PdfTabbedPane extends JTabbedPane {
         Component c = getComponentAt(idx);
 
         if (c instanceof PdfViewerPanel) {
+            PdfViewerPanel viewerPanel = (PdfViewerPanel) c;
             String title = getTitleAt(idx);
 
             remove(idx);
-            openedFiles.remove(((PdfViewerPanel) c).getBookId());// removes the tab *and* keeps 'c'
-            peer.addPdfFile(title, (PdfViewerPanel) c); // add to the opposite side
+            notifyBookClosing(title);
+            peer.addPdfFile(title, viewerPanel); // add to the opposite side
         }
     }
 
     public void addPdfFile(String title, PdfViewerPanel panel) {
         if (!openedFiles.contains(panel.getBookId())) {
-            openedFiles.add(panel.getBookId());
+            openedFiles.add(title);
             panel.setSideId(sideId);
 
             addTab(title, panel);
@@ -79,8 +80,14 @@ public class PdfTabbedPane extends JTabbedPane {
         }
     }
 
-    public boolean isBookOpen(int bookId) {
-        return openedFiles.contains(bookId);
+    public boolean isBookOpen(String title) {
+        return openedFiles.contains(title);
+    }
+
+    public void notifyBookClosing(String title) {
+        if (openedFiles.contains(title)) {
+            openedFiles.remove(title);
+        }
     }
 
     public void selectBook(int bookId) {

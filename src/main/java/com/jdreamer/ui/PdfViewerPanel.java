@@ -185,19 +185,22 @@ public class PdfViewerPanel extends JPanel {
         session.setOpenAtStartup(false);
         bookService.saveSession(session);
 
-        Component parent = SwingUtilities.getAncestorOfClass(JTabbedPane.class, this);
+        Component parent = SwingUtilities.getAncestorOfClass(PdfTabbedPane.class, this);
 
-        if (!(parent instanceof JTabbedPane)) return;          // safety
+        if (!(parent instanceof PdfTabbedPane pdfTabbedPane)) return;          // safety
 
         // 2. Locate our index in that tabbed pane
-        int idx = ((JTabbedPane) parent).indexOfComponent(this);
+        int idx = pdfTabbedPane.indexOfComponent(this);
         if (idx == -1) return;
+
+        String title = pdfTabbedPane.getTitleAt(idx);
 
         // 3. Dispose of PDF resources
         dispose();
 
         // 4. Remove the tab (this removes us from the UI)
-        ((JTabbedPane) parent).remove(idx);
+        pdfTabbedPane.remove(idx);
+        pdfTabbedPane.notifyBookClosing(title);
     }
 
     /**

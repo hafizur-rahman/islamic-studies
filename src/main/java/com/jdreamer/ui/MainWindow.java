@@ -162,12 +162,12 @@ public class MainWindow extends JFrame {
 
             PdfTabbedPane targetPane = userSession.getSide() == 0 ? leftPane : rightPane;
 
-            if (targetPane.isBookOpen(currentBookId)) {
+            String tabTitle = file.getName() + " (ID: " + currentBookId + ")";
+            if (targetPane.isBookOpen(tabTitle)) {
                 targetPane.selectBook(currentBookId);
             } else {
                 PdfViewerPanel viewerPanel = new PdfViewerPanel(currentBookId, file, bookService, userSession, listeners);
 
-                String tabTitle = file.getName() + " (ID: " + currentBookId + ")";
                 targetPane.addPdfFile(tabTitle, viewerPanel);
             }
         } catch (Exception e) {
