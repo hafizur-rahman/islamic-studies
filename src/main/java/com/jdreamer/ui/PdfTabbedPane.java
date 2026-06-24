@@ -1,15 +1,17 @@
 package com.jdreamer.ui;
 
-import com.jdreamer.model.UserSession;
-
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.util.ArrayList;
+import java.util.List;
 
 public class PdfTabbedPane extends JTabbedPane {
     private final int sideId;
     private PdfTabbedPane peer;
+
+    private final List<Integer> openedFiles = new ArrayList<>();
 
     public PdfTabbedPane(int sideId) {
         this.sideId = sideId;
@@ -61,16 +63,19 @@ public class PdfTabbedPane extends JTabbedPane {
         if (c instanceof PdfViewerPanel) {
             String title = getTitleAt(idx);
 
-            remove(idx);                           // removes the tab *and* keeps 'c'
+            remove(idx);
+            openedFiles.remove(((PdfViewerPanel) c).getBookId());// removes the tab *and* keeps 'c'
             peer.addPdfFile(title, (PdfViewerPanel) c); // add to the opposite side
         }
     }
 
     public void addPdfFile(String title, PdfViewerPanel panel) {
-        panel.setSideId(sideId);
+        if (!openedFiles.contains(panel.getBookId())) {
+            openedFiles.add(panel.getBookId());
+            panel.setSideId(sideId);
 
-        addTab(title, panel);
-        setSelectedComponent(panel);   // make it visible immediately
+            addTab(title, panel);
+            setSelectedComponent(panel);   // make it visible immediately
+        }
     }
-
 }

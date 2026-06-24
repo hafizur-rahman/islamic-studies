@@ -1,11 +1,9 @@
 package com.jdreamer.ui;
 
-import com.jdreamer.cache.MediaUrlCache;
 import com.jdreamer.model.Book;
 import com.jdreamer.model.UserSession;
 import com.jdreamer.service.BookService;
 import com.jdreamer.ui.model.BookOrPageChangeListener;
-import org.apache.pdfbox.Loader;
 
 import javax.swing.*;
 import javax.swing.tree.TreePath;
@@ -15,8 +13,6 @@ import java.awt.dnd.DnDConstants;
 import java.awt.dnd.DropTarget;
 import java.awt.dnd.DropTargetAdapter;
 import java.awt.dnd.DropTargetDropEvent;
-import java.awt.event.WindowAdapter;
-import java.awt.event.WindowEvent;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;

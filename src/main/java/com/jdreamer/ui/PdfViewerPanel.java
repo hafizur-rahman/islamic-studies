@@ -120,8 +120,9 @@ public class PdfViewerPanel extends JPanel {
         navBar.add(btnNext);
 
         navBar.add(Box.createHorizontalStrut(12));   // spacer
-        navBar.add(btnZoomIn);
         navBar.add(btnZoomOut);
+        navBar.add(btnZoomIn);
+
         navBar.add(Box.createHorizontalStrut(12));   // spacer
         navBar.add(btnClose);
 
@@ -224,5 +225,9 @@ public class PdfViewerPanel extends JPanel {
         this.session.setSide(sideId);
 
         bookService.saveSession(session);
+    }
+
+    public Integer getBookId() {
+        return bookId;
     }
 }
